@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Đăng nhập - Trà Sữa Như Say</title>
+<style>
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,#ff6b9d,#ff8fab);height:100vh;display:flex;align-items:center;justify-content:center}
+.box{background:white;padding:40px;border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,.3);width:100%;max-width:360px;text-align:center}
+h1{color:#ff6b9d;margin:0 0 8px}
+p{color:#666;margin:0 0 24px}
+input{width:100%;padding:14px;margin-bottom:12px;border:2px solid #ffe1ea;border-radius:12px;font-size:1rem;box-sizing:border-box;outline:none}
+input:focus{border-color:#ff8fab}
+button{width:100%;padding:14px;background:linear-gradient(135deg,#ff6b9d,#ff8fab);color:white;border:none;border-radius:12px;font-weight:700;font-size:1.05rem;cursor:pointer}
+.error{color:#ff4757;margin-top:12px;display:none}
+</style>
+</head>
+<body>
+<div class="box">
+  <h1>🧋 Như Say</h1>
+  <p>Đăng nhập để vào POS</p>
+  <input id="user" placeholder="Tài khoản" value="admin" autocomplete="username">
+  <input id="pass" type="password" placeholder="Mật khẩu" autocomplete="current-password">
+  <button id="btn">ĐĂNG NHẬP</button>
+  <div id="err" class="error">Sai tài khoản hoặc mật khẩu</div>
+  <p style="font-size:.8rem;color:#999;margin-top:16px">admin / 260426<br>nhanvien / 140799</p>
+</div>
+<script>
+const USERS=[
+  {user:'admin',pass:'260426',role:'admin',name:'Quản lý'},
+  {user:'nhanvien',pass:'140799',role:'staff',name:'Nhân viên'}
+];
+function login(){
+  const u=document.getElementById('user').value.trim();
+  const p=document.getElementById('pass').value;
+  const found=USERS.find(x=>x.user===u && x.pass===p);
+  if(found){
+    sessionStorage.setItem('tsns_user', JSON.stringify(found));
+    location.href='pos.html';
+  }else{
+    document.getElementById('err').style.display='block';
+  }
+}
+document.getElementById('btn').onclick=login;
+document.getElementById('pass').onkeypress=e=>{if(e.key==='Enter')login();};
+if(sessionStorage.getItem('tsns_user')) location.href='pos.html';
+</script>
+</body>
+</html>
