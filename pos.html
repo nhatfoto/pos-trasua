@@ -2,195 +2,207 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<title>Như Say POS</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@500;700;800&family=Plus+Jakarta+Sans:wght@500;700&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trà Sữa Như Say - POS</title>
 <style>
-:root{--pink:#ff5c8a;--pink2:#ff8db1;--cream:#fff7fa;--ink:#1f1f23;--muted:#7b7f87;--line:#ffe0e9;--card:#ffffff;--shadow:0 12px 40px rgba(255,92,138,.18);--r:22px}
-*{box-sizing:border-box}html,body{height:100%}
-body{margin:0;font-family:"Plus Jakarta Sans","Be Vietnam Pro",system-ui,sans-serif;background:
- radial-gradient(900px 500px at 90% -10%, #ffe7f0 0, transparent 60%),
- radial-gradient(800px 400px at -10% 10%, #fff1f6 0, transparent 55%),
- var(--cream);color:var(--ink)}
-.app{display:grid;grid-template-columns:280px 1fr 380px;min-height:100vh}
-@media(max-width:1200px){.app{grid-template-columns:1fr 380px}.sidebar{display:none}}
-@media(max-width:980px){.app{grid-template-columns:1fr}.right{position:fixed;left:0;right:0;bottom:0;z-index:40}}
-
-/* SIDEBAR */
-.sidebar{position:sticky;top:0;height:100vh;padding:20px 16px;background:linear-gradient(180deg,#ffffffcc,#ffffff99);backdrop-filter:blur(14px);border-right:1px solid var(--line)}
-.brand{display:flex;align-items:center;gap:12px;margin-bottom:18px}
-.brand img{width:56px;height:56px;border-radius:50%;object-fit:cover;box-shadow:0 6px 18px rgba(0,0,0,.12);border:3px solid #fff}
-.brand h1{font-family:"Be Vietnam Pro";font-size:1.25rem;margin:0;line-height:1.1}
-.brand small{color:var(--muted)}
-.nav{display:flex;flex-direction:column;gap:8px;margin-top:12px}
-.nav button{display:flex;align-items:center;gap:10px;width:100%;padding:12px 14px;border:1px solid var(--line);background:#fff;border-radius:14px;font-weight:700;cursor:pointer;transition:.18s}
-.nav button.active,.nav button:hover{background:linear-gradient(135deg,var(--pink),var(--pink2));color:#fff;border-color:transparent;box-shadow:var(--shadow);transform:translateY(-1px)}
-.nav .ico{font-size:1.1rem}
-.shop-card{margin-top:auto;background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px;box-shadow:0 6px 16px rgba(0,0,0,.05)}
-.shop-card .row{display:flex;justify-content:space-between;font-size:.9rem;color:var(--muted)}
-
-/* TOPBAR */
-.topbar{position:sticky;top:0;z-index:30;background:#ffffffb3;backdrop-filter:saturate(180%) blur(10px);border-bottom:1px solid var(--line)}
-.top-inner{max-width:1400px;margin:0 auto;padding:12px 16px;display:flex;gap:12px;align-items:center}
-.search-wrap{flex:1;display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:10px 12px;box-shadow:0 4px 12px rgba(0,0,0,.04)}
-.search-wrap input{border:none;outline:none;width:100%;font-size:1rem;background:transparent}
-.user-chip{margin-left:auto;display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--line);padding:8px 12px;border-radius:999px;cursor:pointer;font-weight:700}
-.user-chip img{width:28px;height:28px;border-radius:50%}
-
-/* MAIN */
-.main{padding:18px 16px 120px}
-.cats{display:flex;gap:10px;overflow:auto;padding:6px 2px 14px;scrollbar-width:none}
-.cats::-webkit-scrollbar{display:none}
-.cat{flex:0 0 auto;display:flex;align-items:center;gap:8px;padding:10px 14px;background:#fff;border:1.5px solid var(--line);border-radius:999px;font-weight:700;color:#5b5f66;cursor:pointer;white-space:nowrap}
-.cat.active{background:#fff0f5;border-color:#ffc2d4;color:#c2185b;box-shadow:0 4px 12px rgba(255,92,138,.15)}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px}
-.card{position:relative;background:#fff;border:1px solid #ffe4ec;border-radius:20px;overflow:hidden;box-shadow:0 8px 24px rgba(255,92,138,.10);transition:.18s;cursor:pointer}
-.card:hover{transform:translateY(-4px);box-shadow:0 16px 36px rgba(255,92,138,.18)}
-.thumb{aspect-ratio:1/1;background:#fff5f8;display:grid;place-items:center;overflow:hidden}
-.thumb img{width:100%;height:100%;object-fit:cover;transition:.3s}
-.card:hover .thumb img{transform:scale(1.05)}
-.badge{position:absolute;top:10px;right:10px;background:#ffffffee;border:1px solid #ffd0de;color:#d81b60;font-weight:800;padding:6px 10px;border-radius:999px;backdrop-filter:blur(6px)}
-.info{padding:12px}
-.name{font-weight:800;line-height:1.25;min-height:2.6em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.meta{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
-.add{width:36px;height:36px;border:none;border-radius:12px;background:linear-gradient(135deg,var(--pink),var(--pink2));color:#fff;font-size:20px;cursor:pointer;box-shadow:0 8px 16px rgba(255,92,138,.3)}
-
-/* RIGHT CART */
-.right{padding:16px}
-.cart{background:#ffffffd9;backdrop-filter:blur(14px);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);display:flex;flex-direction:column;height:calc(100vh - 32px);overflow:hidden}
-@media(max-width:980px){.cart{height:58vh;border-radius:24px 24px 0 0}}
-.cart-h{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--line);background:linear-gradient(#fff,#fff8fb)}
-.cart-h h3{margin:0;color:#c2185b;font-family:"Be Vietnam Pro"}
-.table-select{display:flex;gap:6px;flex-wrap:wrap;padding:10px 12px;border-bottom:1px dashed var(--line);background:#fff}
-.table-select button{padding:8px 12px;border:1.5px solid var(--line);background:#fff;border-radius:10px;font-weight:700;cursor:pointer}
-.table-select button.active{background:linear-gradient(135deg,var(--pink),var(--pink2));color:#fff;border-color:transparent}
-.items{flex:1;overflow:auto;padding:12px;background:linear-gradient(transparent,#fff0f5aa)}
-.empty{color:#9aa0a6;text-align:center;padding:40px 10px}
-.item{display:flex;gap:10px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px;margin-bottom:8px}
-.item img{width:44px;height:44px;border-radius:10px;object-fit:cover;background:#fff5f8}
-.item .t{flex:1;min-width:0}
-.item .n{font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.item .p{font-size:.9rem;color:var(--muted)}
-.qty{display:flex;align-items:center;gap:6px}
-.q{width:30px;height:30px;border:1px solid var(--line);background:#fff;border-radius:10px;font-weight:800;cursor:pointer}
-.qv{min-width:24px;text-align:center;font-weight:800}
-.foot{padding:14px;border-top:1px solid var(--line);background:#fff}
-.sum{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-.sum strong{font-size:1.4rem;color:#c2185b}
-.pay{width:100%;padding:14px;border:none;border-radius:14px;background:linear-gradient(135deg,var(--pink),var(--pink2));color:#fff;font-weight:800;font-size:1.05rem;cursor:pointer;box-shadow:0 12px 24px rgba(255,92,138,.3)}
-.pay:disabled{opacity:.5;box-shadow:none}
-
-/* STATS */
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin:10px 0 16px}
-.stat{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px;text-align:center;box-shadow:var(--shadow)}
-.stat h4{margin:0 0 6px;color:#6b7280}
-.stat .v{font-size:2rem;font-weight:800;color:#c2185b}
-
-/* MODAL */
-.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(4px);z-index:100;align-items:center;justify-content:center;padding:20px}
-.modal.show{display:flex}
-.box{background:#fff;border-radius:24px;padding:24px;max-width:420px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.25);border:1px solid var(--line);text-align:center}
-.box .ok{font-size:3rem}
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@600;800&family=Plus+Jakarta+Sans:wght@500;700&display=swap');
+:root{--pink:#ff5c8a;--pink2:#ff8db1;--bg:#fff7fa;--line:#ffe1ea;--card:#ffffffee;--shadow:0 14px 40px rgba(255,92,138,.18);--r:20px}
+*{box-sizing:border-box}body{margin:0;font-family:"Plus Jakarta Sans","Be Vietnam Pro",system-ui;background:radial-gradient(1000px 600px at 85% -10%,#ffe4ec 0,transparent 60%),var(--bg);color:#222}
+header{position:sticky;top:0;z-index:50;background:linear-gradient(135deg,var(--pink),var(--pink2));color:#fff;padding:12px 16px;box-shadow:0 8px 24px rgba(255,92,138,.25)}
+.head{max-width:1320px;margin:0 auto;display:flex;align-items:center;gap:14px}
+.head img{width:52px;height:52px;border-radius:50%;border:3px solid #fff;object-fit:cover;box-shadow:0 4px 12px rgba(0,0,0,.15)}
+.head h1{font-family:"Be Vietnam Pro";font-size:1.3rem;margin:0;font-weight:800}
+.head .sub{opacity:.95;font-size:.85rem}
+.user{margin-left:auto;background:#ffffff22;border:1px solid #ffffff55;padding:8px 14px;border-radius:999px;font-weight:700;cursor:pointer;backdrop-filter:blur(6px)}
+nav{position:sticky;top:76px;z-index:40;background:#ffffffb8;backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.navin{max-width:1320px;margin:0 auto;padding:10px 16px;display:flex;gap:8px;justify-content:center}
+.tab{border:1px solid var(--line);background:#fff;padding:10px 18px;border-radius:999px;font-weight:700;color:#c2185b;cursor:pointer}
+.tab.active,.tab:hover{background:linear-gradient(135deg,var(--pink),var(--pink2));color:#fff;border-color:transparent;box-shadow:var(--shadow)}
+.view{max-width:1320px;margin:18px auto;padding:0 16px;display:none}
+.view.active{display:block}
+.pos{display:grid;grid-template-columns:1.1fr 380px;gap:20px}
+@media(max-width:1020px){.pos{grid-template-columns:1fr;padding-bottom:340px}}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;box-shadow:var(--shadow);backdrop-filter:blur(10px)}
+.tables{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.table-btn{border:1.5px solid var(--line);background:#fff;padding:9px 14px;border-radius:12px;font-weight:700;color:#666;cursor:pointer}
+.table-btn.active{background:linear-gradient(135deg,var(--pink),var(--pink2));color:#fff;border-color:transparent;box-shadow:0 6px 16px rgba(255,92,138,.3)}
+.search{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;outline:none;font-size:1rem}
+.search:focus{border-color:var(--pink2);box-shadow:0 0 0 4px #ffd6e3}
+.cats{display:flex;gap:8px;overflow:auto;padding:8px 0 12px}
+.cat-btn{white-space:nowrap;border:1.5px solid var(--line);padding:8px 14px;border-radius:999px;background:#fff;font-weight:700;color:#666;cursor:pointer}
+.cat-btn.active{background:#fff0f5;color:#c2185b;border-color:#ffc2d4}
+.products{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px}
+.product{background:#fff;border:1px solid #ffe4ec;border-radius:18px;padding:12px;text-align:center;cursor:pointer;transition:.18s;box-shadow:0 6px 18px rgba(255,92,138,.08)}
+.product:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(255,92,138,.18)}
+.product img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:12px;margin-bottom:8px;background:#fff5f8}
+.product .icon{font-size:2.3rem;margin:12px 0}
+.product .name{font-weight:700;min-height:2.6em}
+.product .price{display:inline-block;margin-top:6px;background:#fff0f5;color:#c2185b;font-weight:800;padding:6px 10px;border-radius:999px;border:1px solid #ffd0de}
+.cart{position:sticky;top:132px;background:var(--card);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);display:flex;flex-direction:column;max-height:calc(100vh - 160px);overflow:hidden}
+@media(max-width:1020px){.cart{position:fixed;left:12px;right:12px;bottom:12px;max-height:58vh}}
+.cart-header{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;background:linear-gradient(#fff,#fff8fb)}
+.cart-header h3{margin:0;color:#c2185b}
+.cart-count{background:#fff0f5;border:1px solid #ffd0de;color:#c2185b;padding:4px 10px;border-radius:999px;font-weight:700}
+.cart-items{flex:1;overflow:auto;padding:12px}
+.cart-item{display:flex;gap:10px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px;margin-bottom:8px}
+.cart-item img{width:40px;height:40px;border-radius:8px;object-fit:cover}
+.qty-btn{width:30px;height:30px;border:1px solid var(--line);background:#fff;border-radius:8px;font-weight:800;color:#c2185b;cursor:pointer}
+.cart-footer{padding:14px;border-top:1px solid var(--line);background:#fff}
+.total{display:flex;justify-content:space-between;margin-bottom:10px}
+.total strong{font-size:1.35rem;color:#c2185b}
+.pay-btn{width:100%;padding:14px;border:none;border-radius:12px;background:linear-gradient(135deg,var(--pink),var(--pink2));color:#fff;font-weight:800;font-size:1.05rem;cursor:pointer;box-shadow:0 10px 20px rgba(255,92,138,.3)}
+.pay-btn:disabled{opacity:.5}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin-bottom:16px}
+.stat{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;text-align:center;box-shadow:var(--shadow)}
+.stat .value{font-size:1.9rem;font-weight:800;color:#c2185b}
 </style>
 </head>
 <body>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script>
-const firebaseConfig={apiKey:"AIzaSyABseQ0_Me77MUWnu8ezVtcfCAS4XlRBjs",authDomain:"trasua-nhusay-d6708.firebaseapp.com",databaseURL:"https://trasua-nhusay-d6708-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"trasua-nhusay-d6708",storageBucket:"trasua-nhusay-d6708.firebasestorage.app",messagingSenderId:"626489476647",appId:"1:626489476647:web:04c27b8a7464a95ad9b002"};
-firebase.initializeApp(firebaseConfig);const db=firebase.database();const DB='nhusay-pos';
+const firebaseConfig = {
+  apiKey: "AIzaSyABseQ0_Me77MUWnu8ezVtcfCAS4XlRBjs",
+  authDomain: "trasua-nhusay-d6708.firebaseapp.com",
+  databaseURL: "https://trasua-nhusay-d6708-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "trasua-nhusay-d6708",
+  storageBucket: "trasua-nhusay-d6708.firebasestorage.app",
+  messagingSenderId: "626489476647",
+  appId: "1:626489476647:web:04c27b8a7464a95ad9b002"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const DB_PATH = 'nhusay-pos';
 </script>
-<script>const u=sessionStorage.getItem('tsns_user');if(!u)location.href='index.html';const currentUser=JSON.parse(u);</script>
-
-<div class="app">
-  <aside class="sidebar">
-    <div class="brand">
-      <img src="logo.png" alt="Như Say">
-      <div><h1>Như Say</h1><small>Trà sữa & more</small></div>
-    </div>
-    <div class="nav">
-      <button class="active" data-v="ban-hang" onclick="go('ban-hang',this)"><span class="ico">🧋</span>Bán hàng</button>
-      <button data-v="doanh-thu" onclick="go('doanh-thu',this)"><span class="ico">📊</span>Doanh thu</button>
-      <button id="btn-ql" data-v="quan-ly" onclick="go('quan-ly',this)"><span class="ico">⚙️</span>Quản lý menu</button>
-    </div>
-    <div class="shop-card">
-      <div class="row"><span>Hôm nay</span><strong id="mini-day">0đ</strong></div>
-      <div class="row"><span>Bàn đang dùng</span><strong id="mini-tables">0</strong></div>
-    </div>
-  </aside>
-
-  <section>
-    <div class="topbar"><div class="top-inner">
-      <div class="search-wrap">🔍<input id="q" placeholder="Tìm trà sữa, topping..."></div>
-      <div class="user-chip" onclick="logout()" title="Đăng xuất"><img src="logo.png"><span id="uname"></span></div>
-    </div></div>
-
-    <div class="main">
-      <!-- BÁN HÀNG -->
-      <div id="v-ban-hang">
-        <div class="cats" id="cats"></div>
-        <div class="grid" id="grid"></div>
-      </div>
-      <!-- DOANH THU -->
-      <div id="v-doanh-thu" style="display:none">
-        <div class="stats">
-          <div class="stat"><h4>Hôm nay</h4><div class="v" id="s-day">0đ</div></div>
-          <div class="stat"><h4>Tuần này</h4><div class="v" id="s-week">0đ</div></div>
-          <div class="stat"><h4>Tháng này</h4><div class="v" id="s-month">0đ</div></div>
-        </div>
-        <div id="hist"></div>
-      </div>
-      <!-- QUẢN LÝ -->
-      <div id="v-quan-ly" style="display:none">
-        <div style="display:flex;gap:8px;margin-bottom:10px"><button class="cat" onclick="exp()">⬇️ Export</button><button class="cat" onclick="imp.click()">⬆️ Import</button><input id="imp" type="file" accept=".json" hidden></div>
-        <div id="manage"></div>
-      </div>
-    </div>
-  </section>
-
-  <aside class="right">
-    <div class="cart">
-      <div class="cart-h"><h3 id="cart-title">Mang về</h3><span id="cart-count" style="background:#fff0f5;border:1px solid #ffd0de;padding:4px 10px;border-radius:999px;font-weight:800;color:#c2185b">0 món</span></div>
-      <div class="table-select" id="tables"></div>
-      <div class="items" id="items"><div class="empty">Chưa có món<br><small>Chọn món bên trái</small></div></div>
-      <div class="foot">
-        <div class="sum"><span>Tổng cộng</span><strong id="sum">0đ</strong></div>
-        <button id="pay" class="pay" disabled>THANH TOÁN</button>
-      </div>
-    </div>
-  </aside>
-</div>
-
-<div id="ok" class="modal"><div class="box"><div class="ok">✅</div><h2 style="color:#c2185b;margin:6px 0">Đã thanh toán!</h2><p id="ok-txt" style="color:#6b7280"></p><button onclick="ok.classList.remove('show')" style="margin-top:12px;padding:10px 16px;border:none;border-radius:12px;background:#fff0f5;color:#c2185b;font-weight:800;cursor:pointer">Đóng</button></div></div>
-
 <script>
+const userStr = sessionStorage.getItem('tsns_user');
+if(!userStr){ location.href='index.html'; }
+const currentUser = JSON.parse(userStr);
+</script>
+<header><div class="head"><img src="logo.png" alt="logo"><div><h1>Trà Sữa Như Say</h1><div class="sub">Ngã 3 cơ xương • 0347.047.141</div></div><div id="userInfo" class="user"></div></div></header>
+<nav><div class="navin"><button id="tab-ban-hang" class="tab active" onclick="switchView('ban-hang')">🧋 Bán hàng</button><button id="tab-doanh-thu" class="tab" onclick="switchView('doanh-thu')">📊 Doanh thu</button><button id="tab-quan-ly" class="tab" onclick="switchView('quan-ly')">⚙️ Menu</button></div></nav>
+<section id="view-ban-hang" class="view active">
+  <div class="pos">
+    <div class="panel">
+      <div class="tables">
+        <button class="table-btn active" data-table="Mang về">🥡 Mang về</button>
+        <button class="table-btn" data-table="Bàn 1">Bàn 1</button>
+        <button class="table-btn" data-table="Bàn 2">Bàn 2</button>
+        <button class="table-btn" data-table="Bàn 3">Bàn 3</button>
+        <button class="table-btn" data-table="Bàn 4">Bàn 4</button>
+        <button class="table-btn" data-table="Bàn 5">Bàn 5</button>
+        <button class="table-btn" data-table="Bàn 6">Bàn 6</button>
+        <button class="table-btn" data-table="Bàn 7">Bàn 7</button>
+        <button class="table-btn" data-table="Bàn 8">Bàn 8</button>
+        <button class="table-btn" data-table="Bàn 9">Bàn 9</button>
+        <button class="table-btn" data-table="Bàn 10">Bàn 10</button>
+      </div>
+      <input id="searchBox" class="search" placeholder="🔍 Tìm món...">
+      <div id="cats" class="cats"></div>
+      <div id="products" class="products"></div>
+    </div>
+    <div class="cart">
+      <div class="cart-header"><h3 id="cart-title">Mang về</h3><span id="cart-count" class="cart-count">0 món</span></div>
+      <div id="cart-list" class="cart-items"></div>
+      <div class="cart-footer"><div class="total"><span>Tổng cộng</span><strong id="total-amount">0đ</strong></div><button id="payBtn" class="pay-btn">THANH TOÁN</button></div>
+    </div>
+  </div>
+</section>
+<section id="view-doanh-thu" class="view">
+  <div class="stats"><div class="stat"><h4>Hôm nay</h4><div id="stat-day" class="value">0đ</div></div><div class="stat"><h4>Tuần này</h4><div id="stat-week" class="value">0đ</div></div><div class="stat"><h4>Tháng này</h4><div id="stat-month" class="value">0đ</div></div></div>
+  <div class="section"><div class="section-header"><h3>📜 Lịch sử đơn hàng</h3><button id="clearHistoryBtn" class="btn btn-danger">🗑️ Xóa lịch sử</button></div><div id="history-list"></div></div>
+  <div class="section"><div class="section-header"><h3>🔥 Món bán chạy</h3></div><div id="top-products"></div></div>
+</section>
+<section id="view-quan-ly" class="view">
+  <div class="manage-actions"><button id="exportBtn" class="btn btn-secondary">⬇️ Export JSON</button><button id="importBtn" class="btn btn-secondary">⬆️ Import JSON</button><input type="file" id="importFile" accept=".json" hidden></div>
+  <form id="productForm" class="add-form"><select id="newCat" required><option value="trasua">Trà Sữa</option><option value="tra">Trà Trái Cây</option><option value="latte">Latte</option><option value="yaourt">Yaourt</option><option value="anvat">Ăn Vặt</option><option value="topping">Topping</option></select><input id="newName" placeholder="Tên món *" required><input id="newPrice" type="number" placeholder="Giá *" min="1" required><input id="newIcon" placeholder="Icon"><input id="newImg" placeholder="Link ảnh https://..."><button type="submit">+ Thêm</button></form>
+  <div id="manageList"></div>
+</section>
+<div id="successModal" class="modal"><div class="modal-content"><div class="success-icon">✅</div><h2>Thanh toán thành công!</h2><p id="successDetail"></p><div class="modal-actions"><button id="printBtn">🧾 In hóa đơn</button><button id="closeSuccess">Đóng</button></div></div></div>
+<div id="editModal" class="modal"><div class="modal-content" style="text-align:left"><h2 style="text-align:center;color:var(--pink);margin-bottom:16px">✏️ Sửa món</h2><div style="margin-bottom:12px"><label>Tên món</label><input id="editName" style="width:100%;padding:10px;border:2px solid #ffe1ea;border-radius:10px"></div><div style="margin-bottom:12px"><label>Giá (đ)</label><input id="editPrice" type="number" style="width:100%;padding:10px;border:2px solid #ffe1ea;border-radius:10px"></div><div style="margin-bottom:12px"><label>Icon</label><input id="editIcon" style="width:100%;padding:10px;border:2px solid #ffe1ea;border-radius:10px"></div><div style="margin-bottom:16px"><label>Link ảnh</label><input id="editImg" placeholder="https://..." style="width:100%;padding:10px;border:2px solid #ffe1ea;border-radius:10px"></div><div class="modal-actions"><button id="cancelEdit" style="background:var(--bg);color:#666">Hủy</button><button id="saveEdit" style="background:var(--pink);color:white">Lưu</button></div></div></div>
+<script>
+function logout(){if(confirm('Đăng xuất?')){sessionStorage.removeItem('tsns_user');location.href='index.html';}}
+document.getElementById('userInfo').textContent=`👤 ${currentUser.name}`;document.getElementById('userInfo').onclick=logout;
+document.getElementById('userInfo').onclick=logout;
+if(currentUser.role!=='admin'){document.getElementById('tab-quan-ly').style.display='none';document.getElementById('clearHistoryBtn').style.display='none';}
+const LS_MENU='tsns_menu_v34';
 const CATS={trasua:'Trà Sữa',tra:'Trà Trái Cây',latte:'Latte',yaourt:'Yaourt',anvat:'Ăn Vặt',topping:'Topping'};
-let menu={},orders=[],carts={},table='Mang về',cat='trasua',last=null;
-const fmt=n=>new Intl.NumberFormat('vi-VN').format(n)+'đ';
-function logout(){if(confirm('Đăng xuất?')){sessionStorage.removeItem('tsns_user');location.href='index.html'}}
-document.getElementById('uname').textContent=currentUser.name;
-if(currentUser.role!=='admin')document.getElementById('btn-ql').style.display='none';
-
-function go(v,btn){document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');['ban-hang','doanh-thu','quan-ly'].forEach(id=>document.getElementById('v-'+id).style.display=id===v?'block':'none')}
-
-function renderCats(){document.getElementById('cats').innerHTML=Object.entries(CATS).map(([k,n])=>`<div class="cat ${k===cat?'active':''}" onclick="cat='${k}';renderCats();renderGrid()">${n}</div>`).join('')}
-function renderGrid(){const q=document.getElementById('q').value.toLowerCase();const list=(menu[cat]||[]).filter(p=>p.name.toLowerCase().includes(q));document.getElementById('grid').innerHTML=list.map((p,i)=>{const img=p.img||'';const thumb=img?`<img src="${img}">`:`<div style="font-size:2.4rem">${p.icon||'🧋'}</div>`;return `<div class="card" onclick="add('${cat}',${menu[cat].indexOf(p)})"><div class="thumb">${thumb}</div><div class="badge">${fmt(p.price)}</div><div class="info"><div class="name">${p.name}</div><div class="meta"><span style="color:#8a8f98;font-size:.9rem">Còn hàng</span><button class="add" onclick="event.stopPropagation();add('${cat}',${menu[cat].indexOf(p)})">+</button></div></div></div>`}).join('')||`<div style="grid-column:1/-1;text-align:center;color:#999;padding:40px">Không tìm thấy</div>`}
-function renderTables(){const arr=['Mang về',...Array.from({length:10},(_,i)=>`Bàn ${i+1}`)];document.getElementById('tables').innerHTML=arr.map(t=>`<button class="${t===table?'active':''}" onclick="selectTable('${t}')">${t}</button>`).join('')}
-function selectTable(t){table=t;document.getElementById('cart-title').textContent=t;renderTables();renderCart()}
-function add(c,i){const p=menu[c][i];carts[table]=carts[table]||[];const f=carts[table].find(x=>x.name===p.name);if(f)f.qty++;else carts[table].push({...p,qty:1});save();renderCart();bump()}
-function renderCart(){carts[table]=carts[table]||[];const list=carts[table];document.getElementById('cart-count').textContent=list.reduce((s,x)=>s+x.qty,0)+' món';document.getElementById('sum').textContent=fmt(list.reduce((s,x)=>s+x.price*x.qty,0));document.getElementById('pay').disabled=!list.length;document.getElementById('items').innerHTML=list.length?list.map((it,i)=>`<div class="item"><img src="${it.img||'logo.png'}"><div class="t"><div class="n">${it.name}</div><div class="p">${fmt(it.price)}</div></div><div class="qty"><button class="q" onclick="chg(${i},-1)">−</button><div class="qv">${it.qty}</div><button class="q" onclick="chg(${i},1)">+</button></div></div>`).join(''):`<div class="empty">Chưa có món<br><small>Chọn món bên trái</small></div>`;document.getElementById('mini-tables').textContent=Object.values(carts).filter(a=>a.length).length}
-function chg(i,d){const a=carts[table];a[i].qty+=d;if(a[i].qty<1)a.splice(i,1);save();renderCart()}
-function pay(){const list=carts[table];if(!list.length)return;const total=list.reduce((s,x)=>s+x.price*x.qty,0);const o={id:Date.now(),table,items:JSON.parse(JSON.stringify(list)),total,time:new Date().toISOString(),user:currentUser.user};orders.unshift(o);carts[table]=[];last=o;save();renderCart();renderStats();document.getElementById('ok-txt').textContent=`${table} • ${fmt(total)}`;document.getElementById('ok').classList.add('show');printBill(o)}
-function printBill(o){const w=window.open('','_blank','width=320,height=600');w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Bill</title><style>@page{size:80mm auto;margin:0}body{font-family:'Courier New',monospace;width:72mm;padding:3mm;margin:0;font-size:12px}h1{font-size:15px;text-align:center;margin:0}hr{border:none;border-top:1px dashed #000;margin:5px 0}.r{text-align:right}</style></head><body onload="window.print();setTimeout(()=>window.close(),400)"><h1>TRÀ SỮA NHƯ SAY</h1><div style="text-align:center;font-size:11px">Ngã 3 cơ xương<br>0347.047.141</div><hr><div>HD:${o.id.toString().slice(-6)} - ${o.table}<br>${new Date(o.time).toLocaleString('vi-VN')}<br>NV:${o.user}</div><hr><table width="100%">${o.items.map(it=>`<tr><td>${it.name} x${it.qty}</td><td class="r">${(it.price*it.qty).toLocaleString('vi-VN')}</td></tr>`).join('')}</table><hr><div style="display:flex;justify-content:space-between;font-weight:bold"><span>TỔNG</span><span>${o.total.toLocaleString('vi-VN')}đ</span></div><div style="text-align:center;margin-top:6px">Cảm ơn quý khách!</div></body></html>`);w.document.close()}
-function bump(){const b=document.getElementById('pay');b.style.transform='scale(1.03)';setTimeout(()=>b.style.transform='',120)}
-function save(){db.ref(DB).update({menu,orders,carts})}
-function renderStats(){const now=new Date();const td=now.toDateString();const sDay=orders.filter(o=>new Date(o.time).toDateString()===td).reduce((s,o)=>s+o.total,0);const wk=new Date(now);wk.setDate(now.getDate()-now.getDay());const sW=orders.filter(o=>new Date(o.time)>=wk).reduce((s,o)=>s+o.total,0);const sM=orders.filter(o=>new Date(o.time).getMonth()===now.getMonth()).reduce((s,o)=>s+o.total,0);s_day.textContent=fmt(sDay);s_week.textContent=fmt(sW);s_month.textContent=fmt(sM);document.getElementById('mini-day').textContent=fmt(sDay);document.getElementById('hist').innerHTML=orders.slice(0,30).map(o=>`<div style="background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px;margin-bottom:8px;display:flex;justify-content:space-between"><div><strong>${o.table}</strong> • ${o.items.map(i=>i.name+'x'+i.qty).join(', ')}<div style="color:#8a8f98;font-size:.85rem">${new Date(o.time).toLocaleString('vi-VN')}</div></div><strong style="color:#c2185b">${fmt(o.total)}</strong></div>`).join('')||'Chưa có đơn'}
-function exp(){const b=new Blob([JSON.stringify(menu,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='menu-nhusay.json';a.click()}
-document.getElementById('imp').onchange=e=>{const f=e.target.files[0];const r=new FileReader();r.onload=()=>{menu=JSON.parse(r.result);save();renderGrid()};r.readAsText(f)}
-document.getElementById('q').oninput=renderGrid;
-document.getElementById('pay').onclick=pay;
-db.ref(DB).on('value',s=>{const d=s.val()||{};menu=d.menu||{};orders=d.orders||[];carts=d.carts||{};['Mang về',...Array.from({length:10},(_,i)=>`Bàn ${i+1}`)].forEach(t=>carts[t]=carts[t]||[]);renderCats();renderGrid();renderTables();renderCart();renderStats()});
+const DEFAULT_MENU={trasua:[{name:"Trà sữa truyền thống",price:25000,icon:"🧋",img:""},{name:"Trà sữa thái xanh",price:25000,icon:"💚",img:""},{name:"Trà sữa khoai môn",price:25000,icon:"💜",img:""}],tra:[{name:"Trà đào",price:20000,icon:"🍑",img:""},{name:"Trà vải",price:20000,icon:"🍒",img:""}],latte:[],yaourt:[],anvat:[],topping:[]};
+let menu=JSON.parse(localStorage.getItem(LS_MENU))||DEFAULT_MENU;let orders=[];let carts={};let currentTable='Mang về';let currentCat='trasua';let lastOrder=null;
+function saveAll(){localStorage.setItem(LS_MENU,JSON.stringify(menu));db.ref(DB_PATH).update({menu,orders,carts});}
+function formatPrice(n){return new Intl.NumberFormat('vi-VN').format(n)+'đ';}
+function switchView(v){document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));document.getElementById('view-'+v).classList.add('active');document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));document.getElementById('tab-'+v).classList.add('active');if(v==='doanh-thu')renderStats();if(v==='quan-ly')renderManageList();}
+function renderCats(){document.getElementById('cats').innerHTML=Object.entries(CATS).map(([k,n])=>`<button class="cat-btn ${k===currentCat?'active':''}" onclick="selectCat('${k}')">${n}</button>`).join('');}
+function selectCat(k){currentCat=k;renderCats();renderProducts();}
+function renderProducts(){const grid=document.getElementById('products');const term=document.getElementById('searchBox').value.toLowerCase();const items=(menu[currentCat]||[]).filter(p=>p.name.toLowerCase().includes(term));grid.innerHTML=items.map(p=>{const i=menu[currentCat].indexOf(p);const img=p.img?`<img src="${p.img}">`:`<div class="icon">${p.icon||'🧋'}</div>`;return `<div class="product" onclick="addToCart('${currentCat}',${i})">${img}<div class="name">${p.name}</div><div class="price">${formatPrice(p.price)}</div></div>`;}).join('')||`<div style="text-align:center;padding:40px;color:#999">Không có món</div>`;}
+function selectTable(t){currentTable=t;document.querySelectorAll('.table-btn').forEach(b=>b.classList.toggle('active',b.dataset.table===t));document.getElementById('cart-title').textContent=t;renderCart();}
+function addToCart(cat,idx){const p=menu[cat][idx];const cart=carts[currentTable];const f=cart.find(i=>i.name===p.name);if(f)f.qty++;else cart.push({name:p.name,price:p.price,icon:p.icon,img:p.img,qty:1});saveAll();renderCart();}
+function renderCart(){const cart=carts[currentTable]||[];const list=document.getElementById('cart-list');list.innerHTML=cart.length?cart.map((it,i)=>`<div class="cart-item"><div class="cart-item-info"><div class="cart-item-name">${it.img?`<img src="${it.img}" style="width:24px;height:24px;border-radius:4px;vertical-align:middle;margin-right:4px">`:it.icon||''} ${it.name}</div><div class="cart-item-price">${formatPrice(it.price)}</div></div><div class="cart-qty"><button class="qty-btn" onclick="changeQty(${i},-1)">−</button><span class="qty">${it.qty}</span><button class="qty-btn" onclick="changeQty(${i},1)">+</button></div></div>`).join(''):`<div class="cart-empty">🛒<br>Chưa có món</div>`;const total=cart.reduce((s,i)=>s+i.price*i.qty,0);document.getElementById('cart-count').textContent=`${cart.reduce((s,i)=>s+i.qty,0)} món`;document.getElementById('total-amount').textContent=formatPrice(total);document.getElementById('payBtn').disabled=!cart.length;}
+function changeQty(i,d){const c=carts[currentTable];c[i].qty+=d;if(c[i].qty<1)c.splice(i,1);saveAll();renderCart();}
+function checkout(){const cart=carts[currentTable];if(!cart.length)return;const total=cart.reduce((s,i)=>s+i.price*i.qty,0);const order={id:Date.now(),table:currentTable,items:JSON.parse(JSON.stringify(cart)),total,time:new Date().toISOString(),user:currentUser.user};orders.unshift(order);carts[currentTable]=[];lastOrder=order;saveAll();renderCart();document.getElementById('successDetail').textContent=`${order.table} • ${formatPrice(total)}`;document.getElementById('successModal').classList.add('show');renderStats();}
+function closeModal(){document.getElementById('successModal').classList.remove('show');}
+function printReceipt(){if(!lastOrder)return;const o=lastOrder;const w=window.open('','_blank','width=300,height=600');w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>In</title><style>
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@600;800&family=Plus+Jakarta+Sans:wght@500;700&display=swap');
+:root{--pink:#ff5c8a;--pink2:#ff8db1;--bg:#fff7fa;--line:#ffe1ea;--card:#ffffffee;--shadow:0 14px 40px rgba(255,92,138,.18);--r:20px}
+*{box-sizing:border-box}body{margin:0;font-family:"Plus Jakarta Sans","Be Vietnam Pro",system-ui;background:radial-gradient(1000px 600px at 85% -10%,#ffe4ec 0,transparent 60%),var(--bg);color:#222}
+header{position:sticky;top:0;z-index:50;background:linear-gradient(135deg,var(--pink),var(--pink2));color:#fff;padding:12px 16px;box-shadow:0 8px 24px rgba(255,92,138,.25)}
+.head{max-width:1320px;margin:0 auto;display:flex;align-items:center;gap:14px}
+.head img{width:52px;height:52px;border-radius:50%;border:3px solid #fff;object-fit:cover;box-shadow:0 4px 12px rgba(0,0,0,.15)}
+.head h1{font-family:"Be Vietnam Pro";font-size:1.3rem;margin:0;font-weight:800}
+.head .sub{opacity:.95;font-size:.85rem}
+.user{margin-left:auto;background:#ffffff22;border:1px solid #ffffff55;padding:8px 14px;border-radius:999px;font-weight:700;cursor:pointer;backdrop-filter:blur(6px)}
+nav{position:sticky;top:76px;z-index:40;background:#ffffffb8;backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.navin{max-width:1320px;margin:0 auto;padding:10px 16px;display:flex;gap:8px;justify-content:center}
+.tab{border:1px solid var(--line);background:#fff;padding:10px 18px;border-radius:999px;font-weight:700;color:#c2185b;cursor:pointer}
+.tab.active,.tab:hover{background:linear-gradient(135deg,var(--pink),var(--pink2));color:#fff;border-color:transparent;box-shadow:var(--shadow)}
+.view{max-width:1320px;margin:18px auto;padding:0 16px;display:none}
+.view.active{display:block}
+.pos{display:grid;grid-template-columns:1.1fr 380px;gap:20px}
+@media(max-width:1020px){.pos{grid-template-columns:1fr;padding-bottom:340px}}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;box-shadow:var(--shadow);backdrop-filter:blur(10px)}
+.tables{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.table-btn{border:1.5px solid var(--line);background:#fff;padding:9px 14px;border-radius:12px;font-weight:700;color:#666;cursor:pointer}
+.table-btn.active{background:linear-gradient(135deg,var(--pink),var(--pink2));color:#fff;border-color:transparent;box-shadow:0 6px 16px rgba(255,92,138,.3)}
+.search{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;outline:none;font-size:1rem}
+.search:focus{border-color:var(--pink2);box-shadow:0 0 0 4px #ffd6e3}
+.cats{display:flex;gap:8px;overflow:auto;padding:8px 0 12px}
+.cat-btn{white-space:nowrap;border:1.5px solid var(--line);padding:8px 14px;border-radius:999px;background:#fff;font-weight:700;color:#666;cursor:pointer}
+.cat-btn.active{background:#fff0f5;color:#c2185b;border-color:#ffc2d4}
+.products{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px}
+.product{background:#fff;border:1px solid #ffe4ec;border-radius:18px;padding:12px;text-align:center;cursor:pointer;transition:.18s;box-shadow:0 6px 18px rgba(255,92,138,.08)}
+.product:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(255,92,138,.18)}
+.product img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:12px;margin-bottom:8px;background:#fff5f8}
+.product .icon{font-size:2.3rem;margin:12px 0}
+.product .name{font-weight:700;min-height:2.6em}
+.product .price{display:inline-block;margin-top:6px;background:#fff0f5;color:#c2185b;font-weight:800;padding:6px 10px;border-radius:999px;border:1px solid #ffd0de}
+.cart{position:sticky;top:132px;background:var(--card);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);display:flex;flex-direction:column;max-height:calc(100vh - 160px);overflow:hidden}
+@media(max-width:1020px){.cart{position:fixed;left:12px;right:12px;bottom:12px;max-height:58vh}}
+.cart-header{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;background:linear-gradient(#fff,#fff8fb)}
+.cart-header h3{margin:0;color:#c2185b}
+.cart-count{background:#fff0f5;border:1px solid #ffd0de;color:#c2185b;padding:4px 10px;border-radius:999px;font-weight:700}
+.cart-items{flex:1;overflow:auto;padding:12px}
+.cart-item{display:flex;gap:10px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px;margin-bottom:8px}
+.cart-item img{width:40px;height:40px;border-radius:8px;object-fit:cover}
+.qty-btn{width:30px;height:30px;border:1px solid var(--line);background:#fff;border-radius:8px;font-weight:800;color:#c2185b;cursor:pointer}
+.cart-footer{padding:14px;border-top:1px solid var(--line);background:#fff}
+.total{display:flex;justify-content:space-between;margin-bottom:10px}
+.total strong{font-size:1.35rem;color:#c2185b}
+.pay-btn{width:100%;padding:14px;border:none;border-radius:12px;background:linear-gradient(135deg,var(--pink),var(--pink2));color:#fff;font-weight:800;font-size:1.05rem;cursor:pointer;box-shadow:0 10px 20px rgba(255,92,138,.3)}
+.pay-btn:disabled{opacity:.5}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin-bottom:16px}
+.stat{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;text-align:center;box-shadow:var(--shadow)}
+.stat .value{font-size:1.9rem;font-weight:800;color:#c2185b}
+</style></head><body onload="window.print();setTimeout(()=>window.close(),500)"><h1>TRÀ SỮA NHƯ SAY</h1><div class="center">Ngã 3 cơ xương, Ấp 2<br>ĐT: 0347.047.141</div><hr><div>HD:${o.id.toString().slice(-6)} - ${o.table}<br>${new Date(o.time).toLocaleString('vi-VN')}<br>NV:${o.user}</div><hr><table>${o.items.map(it=>`<tr><td>${it.name} x${it.qty}</td><td class="right">${(it.price*it.qty).toLocaleString('vi-VN')}</td></tr>`).join('')}</table><hr><table class="total"><tr><td>TỔNG</td><td class="right">${o.total.toLocaleString('vi-VN')}đ</td></tr></table><div class="center" style="margin-top:6px">Cảm ơn quý khách!</div><button onclick="window.print()">In lại</button></body></html>`);w.document.close();}
+function renderStats(){const now=new Date();const today=now.toDateString();document.getElementById('stat-day').textContent=formatPrice(orders.filter(o=>new Date(o.time).toDateString()===today).reduce((s,o)=>s+o.total,0));const weekStart=new Date(now);weekStart.setDate(now.getDate()-now.getDay());document.getElementById('stat-week').textContent=formatPrice(orders.filter(o=>new Date(o.time)>=weekStart).reduce((s,o)=>s+o.total,0));document.getElementById('stat-month').textContent=formatPrice(orders.filter(o=>{const d=new Date(o.time);return d.getMonth()===now.getMonth()}).reduce((s,o)=>s+o.total,0));document.getElementById('history-list').innerHTML=orders.slice(0,50).map(o=>`<div class="history-item"><div class="history-info"><strong>${o.table}</strong> • ${o.items.map(i=>`${i.name}x${i.qty}`).join(', ')}<div class="history-time">${new Date(o.time).toLocaleString('vi-VN')} • ${o.user}</div></div><div class="history-total">${formatPrice(o.total)}</div></div>`).join('')||'Chưa có';const counts={};orders.forEach(o=>o.items.forEach(i=>counts[i.name]=(counts[i.name]||0)+i.qty));document.getElementById('top-products').innerHTML=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([n,q])=>`<div class="top-item"><span>${n}</span><strong>${q}</strong></div>`).join('');}
+function clearHistory(){if(currentUser.role!=='admin'){alert('Chỉ admin được xóa!');return;}if(!confirm('Xóa hết lịch sử?'))return;orders=[];saveAll();renderStats();}
+function renderManageList(){const c=document.getElementById('manageList');let h='';Object.entries(menu).forEach(([k,items])=>{h+=`<div class="manage-cat"><h3>${CATS[k]} (${items.length})</h3>`;items.forEach((p,i)=>{const thumb=p.img?`<img src="${p.img}" style="width:28px;height:28px;object-fit:cover;border-radius:4px;margin-right:6px">`:p.icon||'🧋';h+=`<div class="manage-item"><span>${thumb} ${p.name}</span><span>${formatPrice(p.price)}</span><div><button class="edit" onclick="editProduct('${k}',${i})">Sửa</button><button class="del" onclick="deleteProduct('${k}',${i})">Xóa</button></div></div>`});h+='</div>'});c.innerHTML=h;}
+let editingCat,editingIdx;function editProduct(c,i){const p=menu[c][i];editingCat=c;editingIdx=i;editName.value=p.name;editPrice.value=p.price;editIcon.value=p.icon||'';editImg.value=p.img||'';editModal.classList.add('show');}
+function saveEdit(){menu[editingCat][editingIdx]={name:editName.value,price:+editPrice.value,icon:editIcon.value,img:editImg.value};saveAll();renderManageList();renderProducts();editModal.classList.remove('show');}
+function deleteProduct(c,i){if(!confirm('Xóa?'))return;menu[c].splice(i,1);saveAll();renderManageList();renderProducts();}
+document.addEventListener('DOMContentLoaded',()=>{
+  db.ref(DB_PATH).on('value',snap=>{const d=snap.val()||{};if(d.menu)menu=d.menu;if(d.orders)orders=d.orders;if(d.carts)carts=d.carts;['Mang về',...Array(10).fill(0).map((_,i)=>`Bàn ${i+1}`)].forEach(t=>{if(!carts[t])carts[t]=[]});localStorage.setItem(LS_MENU,JSON.stringify(menu));renderCats();renderProducts();renderCart();renderStats();});
+  selectTable('Mang về');searchBox.oninput=renderProducts;payBtn.onclick=checkout;closeSuccess.onclick=closeModal;printBtn.onclick=printReceipt;clearHistoryBtn.onclick=clearHistory;exportBtn.onclick=()=>{const b=new Blob([JSON.stringify(menu,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='menu.json';a.click()};importBtn.onclick=()=>importFile.click();importFile.onchange=e=>{const f=e.target.files[0];const r=new FileReader();r.onload=()=>{menu=JSON.parse(r.result);saveAll();renderManageList()};r.readAsText(f)};productForm.onsubmit=e=>{e.preventDefault();const c=newCat.value;if(!menu[c])menu[c]=[];menu[c].push({name:newName.value,price:+newPrice.value,icon:newIcon.value,img:newImg.value});saveAll();e.target.reset();renderManageList();renderProducts()};cancelEdit.onclick=()=>editModal.classList.remove('show');saveEditBtn=saveEdit;document.getElementById('saveEdit').onclick=saveEdit;
+});
 </script>
 </body>
 </html>
