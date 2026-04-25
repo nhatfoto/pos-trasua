@@ -278,7 +278,20 @@ function renderRevenue(){const today=getLocalDate(),todayOrders=state.orders.fil
 function renderMenuList(){const list=$('menu-list');list.innerHTML='';state.products.forEach(p=>{const row=document.createElement('div');row.className='bg-white rounded-[20px] p-3 shadow-soft flex items-center gap-3';row.innerHTML=`<div class="w-10 h-10 rounded-xl bg-pink-50 grid place-items-center text-[20px]">${p.icon}</div><div class="flex-1 min-w-0"><div class="font-semibold truncate">${p.name}</div><div class="text-[12px] text-zinc-500">${p.category}</div></div><input type="number" value="${p.price}" class="w-[90px] h-9 px-2 rounded-xl bg-zinc-100 text-right font-medium outline-none focus:ring-2 focus:ring-pink-500/30">`;row.querySelector('input').onchange=e=>{p.price=parseInt(e.target.value)||0;if(db)db.ref('nhusay-pos/menu/'+p.id+'/price').set(p.price);renderProducts()};list.appendChild(row)})}
 function switchTab(t){document.querySelectorAll('[id^=tab-]').forEach(s=>s.classList.add('hidden'));$('tab-'+t).classList.remove('hidden');document.querySelectorAll('.tab-btn').forEach(b=>{const a=b.dataset.tab===t;b.classList.toggle('text-pink-600',a);b.classList.toggle('text-zinc-400',!a);b.querySelector('span').classList.toggle('font-semibold',a)})}
 function bindEvents(){$('search').oninput=e=>{state.search=e.target.value;renderProducts()};$('cart-bar-inner').onclick=openCart;$('btn-checkout').onclick=e=>{e.stopPropagation();openCart()};$('cart-close').onclick=closeCart;$('cart-backdrop').onclick=closeCart;$('cart-checkout').onclick=checkout;$('success-done').onclick=hideSuccess;$('success-print').onclick=()=>{if(state.lastOrder)printBill(state.lastOrder);hideSuccess()};document.querySelectorAll('.tab-btn').forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));$('btn-add-product').onclick=()=>{const name=prompt('Tên món:');if(!name)return;const price=parseInt(prompt('Giá:')||'0');const p={id:'p'+Date.now(),name,price,category:'Trà Sữa',active:true,icon:'🧋'};state.products.push(p);if(db)db.ref('nhusay-pos/menu/'+p.id).set(p);updateCategories();renderProducts();renderMenuList()}}
-$('login-form').onsubmit=e=>{e.preventDefault();if($('password').value.trim()==='260426'){$('login').classList.add('hidden');$('app').classList.remove('hidden');init()}else{$('login-error').textContent='Sai mật khẩu';$('password').value=''}};
+$('login-form').onsubmit=e=>{
+  e.preventDefault();
+  if($('password').value.trim()==='260426'){
+    $('login').style.display='none';
+    const app=$('app');
+    app.classList.remove('hidden');
+    app.style.display='flex';
+    init();
+  }else{
+    $('login-error').textContent='Sai mật khẩu';
+    $('password').value='';
+    $('password').focus();
+  }
+};
 </script>
 </body>
 </html>
