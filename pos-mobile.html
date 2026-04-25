@@ -132,50 +132,39 @@ function formatPrice(n){ return new Intl.NumberFormat('vi-VN').format(n)+'đ'; }
 function getLocalDate(){ const d=new Date(); const y=d.getFullYear(); const m=String(d.getMonth()+1).padStart(2,'0'); const day=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${day}`; }
 function init(){ renderTables(); loadData(); bindEvents(); $('cart-table-name').textContent=state.table; }
 
-function loadData(){ if(db){ $('sync-dot') && ($('sync-dot').className='w-1.5 h-1.5 bg-yellow-400 rounded-full animate-pulse'); }
-  if(db){
-    db.ref('nhusay-pos/menu').on('value', snap=>{ const val=snap.val(); state.products = val?Object.entries(val).map(([k,v])=>({...v, id:v.id||k})):SAMPLE_MENU; if(!val){ SAMPLE_MENU.forEach(p=>db.ref('nhusay-pos/menu/'+p.id).set(p)); } updateCategories(); renderProducts(); renderMenuList(); });
-    
-    db.ref('nhusay-pos/orders').limitToLast(200).on('value', snap=>{ 
-      const val=snap.val(); 
-      state.orders = val?Object.values(val).map(o=>{
-        // Auto-fix corrupted orders from old versions
-        if(!o.timestamp || isNaN(o.timestamp)){
-          // Extract date from ID like NS260425-002
-          const match = o.id && o.id.match(/NS(\d{2})(\d{2})(\d{2})/);
-          if(match){
-            const yy = 2000+parseInt(match[1]); const mm=parseInt(match[2])-1; const dd=parseInt(match[3]);
-            if(!o.timestamp || isNaN(o.timestamp)){
-  const match = o.id && o.id.match(/NS(\d{2})(\d{2})(\d{2})/);
-  if(match && o.time && o.time.includes(':')){
-    // Nếu đã có time dạng "16:59", dùng nó
-    const yy = 2000+parseInt(match[1]); const mm=parseInt(match[2])-1; const dd=parseInt(match[3]);
-    const [hh,mi] = o.time.split(':').map(Number);
-    o.timestamp = new Date(yy, mm, dd, hh||0, mi||0).getTime();
-  } else {
-    o.timestamp = Date.now(); // giờ thật, không phải 12h
-  }
-};
-          } else {
-            o.timestamp = Date.now();
-          }
-        }
-        if(!o.date){
-          const d = new Date(o.timestamp);
-          o.date = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-        }
-        if(!o.time){
-          const d = new Date(o.timestamp);
-          o.time = d.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'});
-        }
-        return o;
-      }).sort((a,b)=>b.timestamp-a.timestamp):[]; 
-      renderOrders(); renderRevenue(); 
-      $('sync-dot') && ($('sync-dot').className='w-1.5 h-1.5 bg-green-400 rounded-full'); 
-    });
+function loadData(){
+  if(db){ $('sync-dot').className='w-1.5 h-1.5 bg-yellow-400 rounded-full animate-pulse'; }
+  
+  // MENU
+  db.ref('nhusay-pos/menu').on('value', snap=>{
+    const val=snap.val();
+    state.products = val?Object.entries(val).map(([k,v])=>({...v, id:v.id||k})):SAMPLE_MENU;
+    updateCategories(); renderProducts(); renderMenuList();
+  });
+  
+  // ORDERS - FIX GIỜ THẬT
+  db.ref('nhusay-pos/orders').limitToLast(200).on('value', snap=>{
+    const val=snap.val();
+    state.orders = val?Object.values(val).map(o=>{
+      // Nếu thiếu timestamp thì tạo từ giờ thật, KHÔNG gán 12h
+      if(!o.timestamp || isNaN(o.timestamp)){
+        o.timestamp = o.time ? new Date(o.date+'T'+o.time).getTime() : Date.now();
+      }
+      if(!o.date){ o.date = getLocalDate(); }
+      if(!o.time){ o.time = new Date(o.timestamp).toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit',hour12:false}); }
+      return o;
+    }).sort((a,b)=>b.timestamp-a.timestamp):[];
+    renderOrders(); renderRevenue();
+    $('sync-dot').className='w-1.5 h-1.5 bg-green-400 rounded-full';
+  });
 
-    db.ref('nhusay-pos/settings/tables').on('value', snap=>{ if(snap.exists()){ const val=snap.val(); state.tables = Array.isArray(val)?val:Object.values(val); renderTables(); } });
-  } else { state.products=SAMPLE_MENU; updateCategories(); renderProducts(); renderMenuList(); renderOrders(); renderRevenue(); }
+  // TABLES - LẤY TỪ PC, nếu chưa có thì tạo 10 bàn
+  db.ref('nhusay-pos/settings').on('value', snap=>{
+    const s = snap.val()||{};
+    const n = s.tables || 10;
+    state.tables = ['Mang về', ...Array.from({length:n},(_,i)=>`Bàn ${i+1}`)];
+    renderTables();
+  });
 }
 
 function updateCategories(){ const cats=['Tất cả',...new Set(state.products.filter(p=>p.active!==false).map(p=>p.category))]; state.categories=cats; renderCategories(); }
