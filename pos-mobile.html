@@ -107,6 +107,7 @@
           <div class="text-xs text-gray-500">Số đơn</div>
           <div id="rev-count" class="text-2xl font-bold mt-1">0</div>
         </div>
+      </div>
       <div class="bg-white rounded-2xl p-4 shadow-sm">
         <div class="text-sm font-semibold mb-2">Món bán chạy</div>
         <div id="rev-top" class="space-y-1.5 text-sm"></div>
@@ -249,19 +250,23 @@ function init(){
 
 function loadData(){
   if(db){
-    db.ref('ns/menu').on('value', snap => {
+    db.ref('nhusay-pos/menu').on('value', snap => {
       const val = snap.val();
       state.products = val ? Object.values(val) : SAMPLE_MENU;
-      if(!val){ SAMPLE_MENU.forEach(p => db.ref('ns/menu/'+p.id).set(p)); }
+      if(!val){ SAMPLE_MENU.forEach(p => db.ref('nhusay-pos/menu/'+p.id).set(p)); }
       updateCategories(); renderProducts(); renderMenuList();
     });
-    db.ref('ns/orders').limitToLast(200).on('value', snap => {
+    db.ref('nhusay-pos/orders').limitToLast(200).on('value', snap => {
       const val = snap.val();
       state.orders = val ? Object.values(val).sort((a,b)=>b.timestamp-a.timestamp) : [];
       renderOrders(); renderRevenue();
     });
-    db.ref('ns/settings/tables').on('value', snap => {
-      if(snap.exists()){ state.tables = snap.val(); renderTables(); }
+    db.ref('nhusay-pos/settings/tables').on('value', snap => {
+      if(snap.exists()){
+        const val = snap.val();
+        state.tables = Array.isArray(val) ? val : Object.values(val);
+        renderTables();
+      }
     });
   } else {
     state.products = SAMPLE_MENU;
@@ -270,7 +275,7 @@ function loadData(){
 }
 
 function updateCategories(){
-  const cats = ['Tất cả', ...new Set(state.products.filter(p=>p.active).map(p=>p.category))];
+  const cats = ['Tất cả', ...new Set(state.products.filter(p=>p.active!==false).map(p=>p.category))];
   state.categories = cats;
   renderCategories();
 }
@@ -303,7 +308,7 @@ function renderCategories(){
 function renderProducts(){
   const grid = $('product-grid'); grid.innerHTML='';
   const kw = state.search.toLowerCase();
-  const list = state.products.filter(p=>p.active && (state.activeCategory==='Tất cả' || p.category===state.activeCategory) && (!kw || p.name.toLowerCase().includes(kw)));
+  const list = state.products.filter(p=>p.active!==false && (state.activeCategory==='Tất cả' || p.category===state.activeCategory) && (!kw || p.name.toLowerCase().includes(kw)));
   list.forEach(p=>{
     const btn = document.createElement('button');
     btn.className = 'bg-white rounded-[20px] p-3.5 shadow-sm border border-gray-100 text-left active:scale-[0.97] transition min-h-[90px] flex flex-col justify-between hover:shadow-md';
@@ -321,7 +326,6 @@ function addToCart(p){
   if(i>=0) state.cart[i].qty++;
   else state.cart.push({id:p.id,name:p.name,price:p.price,qty:1});
   updateCartUI();
-  // haptic
   if(navigator.vibrate) navigator.vibrate(10);
 }
 
@@ -383,7 +387,7 @@ function checkout(){
     date: now.toISOString().split('T')[0],
     status: 'done'
   };
-  if(db){ db.ref('ns/orders/'+id).set(order).catch(()=>{}); }
+  if(db){ db.ref('nhusay-pos/orders/'+id).set(order).catch(()=>{}); }
   state.orders.unshift(order);
   state.lastOrder = order;
   state.cart = [];
@@ -455,10 +459,10 @@ function renderMenuList(){
   state.products.forEach(p=>{
     const div = document.createElement('div');
     div.className = 'bg-white rounded-2xl p-3 shadow-sm border flex items-center gap-3';
-    div.innerHTML = `<div class="flex-1"><div class="font-medium text-[14px]">${p.name}</div><div class="text-[12px] text-gray-500">${p.category}</div></div><input type="number" value="${p.price}" class="w-24 h-10 px-2 rounded-xl bg-gray-100 text-right text-[15px] outline-none focus:ring-2 focus:ring-pink-500" data-id="${p.id}"><label class="flex items-center gap-1 text-[12px]"><input type="checkbox" ${p.active?'checked':''} data-active="${p.id}"> Hiện</label>`;
+    div.innerHTML = `<div class="flex-1"><div class="font-medium text-[14px]">${p.name}</div><div class="text-[12px] text-gray-500">${p.category}</div></div><input type="number" value="${p.price}" class="w-24 h-10 px-2 rounded-xl bg-gray-100 text-right text-[15px] outline-none focus:ring-2 focus:ring-pink-500" data-id="${p.id}"><label class="flex items-center gap-1 text-[12px]"><input type="checkbox" ${p.active!==false?'checked':''} data-active="${p.id}"> Hiện</label>`;
     const inp = div.querySelector('input[type=number]');
-    inp.onchange = ()=>{ p.price = parseInt(inp.value)||0; if(db) db.ref('ns/menu/'+p.id+'/price').set(p.price); renderProducts(); };
-    div.querySelector('input[type=checkbox]').onchange = (e)=>{ p.active=e.target.checked; if(db) db.ref('ns/menu/'+p.id+'/active').set(p.active); updateCategories(); renderProducts(); };
+    inp.onchange = ()=>{ p.price = parseInt(inp.value)||0; if(db) db.ref('nhusay-pos/menu/'+p.id+'/price').set(p.price); renderProducts(); };
+    div.querySelector('input[type=checkbox]').onchange = (e)=>{ p.active=e.target.checked; if(db) db.ref('nhusay-pos/menu/'+p.id+'/active').set(p.active); updateCategories(); renderProducts(); };
     list.appendChild(div);
   });
 }
@@ -491,12 +495,11 @@ function bindEvents(){
     const id = 'p'+Date.now();
     const p = {id,name,price,category:cat,active:true};
     state.products.push(p);
-    if(db) db.ref('ns/menu/'+id).set(p);
+    if(db) db.ref('nhusay-pos/menu/'+id).set(p);
     updateCategories(); renderProducts(); renderMenuList();
   };
 }
 
-// Login handler - phải chạy ngay khi load
 $('login-form').onsubmit = (e)=>{ 
   e.preventDefault(); 
   const pw=$('password').value.trim(); 
@@ -511,10 +514,8 @@ $('login-form').onsubmit = (e)=>{
   } 
 };
 
-// Tự focus ô password trên mobile
 window.addEventListener('load', ()=> setTimeout(()=>$('password').focus(), 300));
 
-// Prevent double-tap zoom
 let lastTouch = 0;
 document.addEventListener('touchend', e=>{ const now=Date.now(); if(now-lastTouch<=300) e.preventDefault(); lastTouch=now; }, {passive:false});
 </script>
