@@ -3,646 +3,164 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>Trà Sữa Như Say • POS</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#d81b60">
+<title>Trà Sữa Như Say - POS</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 <style>
-  *{font-family:'Be Vietnam Pro',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
-  html{-webkit-tap-highlight-color:transparent}
-  body{overscroll-behavior:none;background:#fafafa}
-  .no-scrollbar::-webkit-scrollbar{display:none}
-  .no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}
-  .line-clamp-2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-  .glass{background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.06));backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
-  @keyframes pop{0%{transform:scale(.85);opacity:0}60%{transform:scale(1.08);opacity:1}100%{transform:scale(1)}}
-  .animate-pop{animation:pop .35s cubic-bezier(.2,1.4,.4,1)}
-  @keyframes pulse-ring{0%{transform:scale(.85);opacity:.7}100%{transform:scale(1.6);opacity:0}}
-  .pulse-ring{position:relative}
-  .pulse-ring::after{content:"";position:absolute;inset:0;border-radius:9999px;background:currentColor;animation:pulse-ring .55s ease-out}
-  @keyframes checkdraw{to{stroke-dashoffset:0}}
-  .check-path{stroke-dasharray:32;stroke-dashoffset:32;animation:checkdraw .28s ease-out .05s forwards}
-  @keyframes floatUp{from{transform:translateY(12px);opacity:0}to{transform:translateY(0);opacity:1}}
-  .float-up{animation:floatUp .3s ease-out}
-  .shadow-soft{box-shadow:0 8px 24px rgba(0,0,0,.06)}
-  .shadow-pink{box-shadow:0 10px 30px rgba(216,27,96,.22)}
-  .shadow-big{box-shadow:0 16px 40px rgba(0,0,0,.14)}
+  *{ -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+  html{ -webkit-text-size-adjust:100%; }
+  body{ font-family:'Be Vietnam Pro',system-ui,-apple-system,sans-serif; overscroll-behavior-y:contain; background:#fafafa; }
+  input, select, textarea, button{ font-size:18px; }
+  .no-scrollbar{ -ms-overflow-style:none; scrollbar-width:none; }
+  .no-scrollbar::-webkit-scrollbar{ display:none; }
+  .safe-bottom{ padding-bottom: max(0.5rem, env(safe-area-inset-bottom)); }
+  button{ min-height:44px; min-width:44px; transition: transform .15s ease; }
+  button:active{ transform: scale(0.96); }
+  .card-pop{ background:white; border-radius:20px; box-shadow:0 4px 20px rgba(216,27,96,0.08); border:1px solid rgba(0,0,0,0.04); }
+  .pill-active{ background:linear-gradient(135deg,#d81b60,#ff4081); color:white; box-shadow:0 4px 12px rgba(216,27,96,0.3); }
+  .nav-float{ backdrop-filter: blur(20px); background:rgba(255,255,255,0.9); box-shadow:0 -4px 24px rgba(0,0,0,0.08); border-radius:28px 28px 0 0; }
+  .product-img{ width:56px; height:56px; border-radius:50%; background:linear-gradient(135deg,#ffe4ee,#ffd6e7); display:flex; align-items:center; justify-content:center; font-size:28px; }
+  @keyframes pop { 0%{transform:scale(1)} 50%{transform:scale(1.1)} 100%{transform:scale(1)} }
+  .pop{ animation:pop .3s ease; }
+
+  *{ -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+  html{ -webkit-text-size-adjust:100%; }
+  body{ font-family:'Be Vietnam Pro',system-ui,-apple-system,sans-serif; overscroll-behavior-y:contain; background:#f9fafb; }
+  input, select, textarea, button{ font-size:18px; }
+  .no-scrollbar{ -ms-overflow-style:none; scrollbar-width:none; }
+  .no-scrollbar::-webkit-scrollbar{ display:none; }
+  .safe-bottom{ padding-bottom: max(0.5rem, env(safe-area-inset-bottom)); }
+  button{ min-height:44px; min-width:44px; }
 </style>
 </head>
-<body class="bg-[#fafafa] text-[#1a1a1a] select-none">
-<div class="mx-auto w-full max-w-[480px] min-h-screen relative flex flex-col">
+<body class="bg-gray-50 text-gray-900 select-none">
 
-  <!-- HEADER -->
-  <header class="sticky top-0 z-40">
-    <div class="bg-gradient-to-br from-[#d81b60] to-[#ff4081] pt-[env(safe-area-inset-top)]">
-      <div class="glass border-b border-white/10">
-        <div class="px-5 pb-4 pt-4">
-          <div class="flex items-center gap-3">
-            <div class="w-12 h-12 rounded-[18px] bg-white/20 flex items-center justify-center shadow-inner ring-1 ring-white/30">
-              <span class="text-[26px] leading-none">🧋</span>
-            </div>
-            <div class="flex-1 min-w-0">
-              <h1 class="text-white font-extrabold text-[22px] tracking-tight leading-tight">Trà Sữa Như Say</h1>
-              <p class="text-white/85 text-[12px] font-medium -mt-0.5">Brand Color Pop • POS</p>
-            </div>
-            <div class="flex items-center gap-2">
-              <div class="px-3 py-1.5 rounded-full bg-white/15 text-white text-[11px] font-semibold backdrop-blur">Online</div>
-            </div>
-          </div>
-        </div>
-      </div>
+<div id="login" class="fixed inset-0 z-[200] flex items-center justify-center p-6" style="background:linear-gradient(135deg,#d81b60 0%,#ff6b9d 100%)">
+  <div class="w-full max-w-[340px] bg-white rounded-[28px] shadow-2xl p-8 text-center">
+    <div class="w-20 h-20 mx-auto rounded-2xl flex items-center justify-center mb-4 shadow-lg" style="background:linear-gradient(135deg,#d81b60,#ff6b9d)">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M8 7V5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M7 7h10l1 9a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2l1-9z"/><path d="M10 11v4M14 11v4"/></svg>
     </div>
-  </header>
-
-  <!-- MAIN -->
-  <main class="flex-1 pb-[150px]">
-    <!-- POS VIEW -->
-    <section id="view-pos" class="block">
-      <!-- Table selector -->
-      <div class="px-4 pt-3">
-        <div class="flex items-center justify-between mb-2">
-          <p class="text-[13px] font-bold text-gray-500 uppercase tracking-wide">Chọn bàn</p>
-          <p class="text-[12px] text-gray-400" id="tableHint">Mang về</p>
-        </div>
-        <div id="tableScroll" class="flex gap-2 overflow-x-auto no-scrollbar -mx-1 px-1 pb-1">
-          <!-- tables injected -->
-        </div>
-      </div>
-
-      <!-- Categories -->
-      <div class="mt-3">
-        <div id="categoryScroll" class="flex gap-2 overflow-x-auto no-scrollbar px-4 py-1">
-          <!-- cats injected -->
-        </div>
-      </div>
-
-      <!-- Products -->
-      <div class="px-4 mt-3">
-        <div id="productGrid" class="grid grid-cols-2 gap-3.5">
-          <!-- products injected -->
-        </div>
-        <div id="emptyProducts" class="hidden py-20 text-center">
-          <div class="w-16 h-16 mx-auto rounded-full bg-gray-100 flex items-center justify-center text-2xl">🧋</div>
-          <p class="mt-3 text-gray-500 font-medium">Chưa có sản phẩm</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- ORDERS VIEW -->
-    <section id="view-orders" class="hidden px-4 pt-4">
-      <div class="flex items-center justify-between mb-3">
-        <h2 class="text-[20px] font-extrabold">Đơn hàng</h2>
-        <div class="flex gap-1.5 p-1 bg-gray-100 rounded-full">
-          <button data-ordertab="doing" class="order-tab px-3.5 py-1.5 rounded-full text-[13px] font-semibold bg-[#d81b60] text-white">Đang làm</button>
-          <button data-ordertab="done" class="order-tab px-3.5 py-1.5 rounded-full text-[13px] font-semibold text-gray-600">Hoàn thành</button>
-        </div>
-      </div>
-      <div id="ordersList" class="space-y-3"></div>
-      <div id="emptyOrders" class="hidden py-24 text-center">
-        <div class="text-5xl">📋</div>
-        <p class="mt-3 text-gray-500">Chưa có đơn nào</p>
-      </div>
-    </section>
-
-    <!-- MENU VIEW -->
-    <section id="view-menu" class="hidden px-4 pt-4">
-      <div class="flex items-center justify-between mb-3">
-        <h2 class="text-[20px] font-extrabold">Menu</h2>
-        <button id="addProductBtn" class="h-9 px-4 rounded-full bg-gradient-to-r from-[#d81b60] to-[#ff4081] text-white text-[13px] font-bold shadow-pink active:scale-95">+ Thêm món</button>
-      </div>
-      <div id="menuList" class="space-y-2.5"></div>
-    </section>
-
-    <!-- REVENUE VIEW -->
-    <section id="view-revenue" class="hidden px-4 pt-4">
-      <h2 class="text-[20px] font-extrabold mb-3">Doanh thu</h2>
-      <div class="grid grid-cols-2 gap-3">
-        <div class="bg-white rounded-[20px] p-4 shadow-soft">
-          <p class="text-[12px] text-gray-500 font-medium">Hôm nay</p>
-          <p id="revToday" class="text-[24px] font-extrabold text-[#d81b60] mt-1">0đ</p>
-          <p id="revTodayOrders" class="text-[11px] text-gray-400 mt-0.5">0 đơn</p>
-        </div>
-        <div class="bg-white rounded-[20px] p-4 shadow-soft">
-          <p class="text-[12px] text-gray-500 font-medium">Tháng này</p>
-          <p id="revMonth" class="text-[24px] font-extrabold text-[#1a1a1a] mt-1">0đ</p>
-          <p id="revMonthOrders" class="text-[11px] text-gray-400 mt-0.5">0 đơn</p>
-        </div>
-      </div>
-      <div class="bg-white rounded-[24px] p-4 mt-3 shadow-soft">
-        <p class="font-bold mb-3">7 ngày gần nhất</p>
-        <div id="revChart" class="flex items-end gap-2 h-[120px]"></div>
-      </div>
-      <div class="bg-white rounded-[24px] p-4 mt-3 shadow-soft">
-        <p class="font-bold mb-2">Món bán chạy</p>
-        <div id="topProducts" class="space-y-2"></div>
-      </div>
-    </section>
-
-    <!-- SETTINGS VIEW -->
-    <section id="view-settings" class="hidden px-4 pt-4">
-      <h2 class="text-[20px] font-extrabold mb-3">Cài đặt</h2>
-      <div id="settingsLock" class="bg-white rounded-[24px] p-6 shadow-soft text-center">
-        <div class="w-14 h-14 mx-auto rounded-2xl bg-pink-50 flex items-center justify-center text-[#d81b60] text-2xl">🔒</div>
-        <p class="font-bold mt-3">Khóa bảo vệ</p>
-        <p class="text-[13px] text-gray-500 mt-1">Nhập mật khẩu để tiếp tục</p>
-        <div class="mt-4 flex gap-2">
-          <input id="pwInput" type="password" inputmode="numeric" placeholder="••••••" class="flex-1 h-12 rounded-2xl bg-gray-50 px-4 text-center text-[18px] tracking-widest font-bold outline-none focus:ring-2 focus:ring-[#ff4081]/30">
-          <button id="pwBtn" class="h-12 px-5 rounded-2xl bg-[#1a1a1a] text-white font-bold active:scale-95">Mở</button>
-        </div>
-        <p id="pwError" class="text-[12px] text-red-500 mt-2 hidden">Sai mật khẩu</p>
-      </div>
-      <div id="settingsContent" class="hidden space-y-3">
-        <div class="bg-white rounded-[24px] p-4 shadow-soft">
-          <p class="font-bold mb-2">Cửa hàng</p>
-          <div class="space-y-2.5">
-            <div>
-              <p class="text-[12px] text-gray-500 mb-1">Tên quán</p>
-              <input id="storeName" class="w-full h-11 rounded-xl bg-gray-50 px-3 outline-none focus:ring-2 focus:ring-pink-200" value="Trà Sữa Như Say">
-            </div>
-          </div>
-          <button id="saveStore" class="mt-3 w-full h-11 rounded-xl bg-gradient-to-r from-[#d81b60] to-[#ff4081] text-white font-bold shadow-pink active:scale-[.98]">Lưu</button>
-        </div>
-        <div class="bg-white rounded-[24px] p-4 shadow-soft">
-          <p class="font-bold mb-2">Dữ liệu</p>
-          <div class="grid grid-cols-2 gap-2">
-            <button id="exportData" class="h-11 rounded-xl bg-gray-900 text-white font-semibold active:scale-95">Xuất JSON</button>
-            <button id="clearData" class="h-11 rounded-xl bg-red-50 text-red-600 font-semibold active:scale-95">Xóa tất cả</button>
-          </div>
-          <p class="text-[11px] text-gray-400 mt-2">Firebase paths: nhusay-pos/products, nhusay-pos/orders</p>
-        </div>
-        <div class="bg-white rounded-[24px] p-4 shadow-soft">
-          <p class="font-bold">Phiên bản</p>
-          <p class="text-[13px] text-gray-500 mt-1">Brand Color Pop • v1.0 • Mật khẩu: 260426</p>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <!-- CART BAR -->
-  <div id="cartBar" class="fixed z-40 left-1/2 -translate-x-1/2 bottom-[92px] w-[calc(100%-32px)] max-w-[448px] transition-transform duration-400 translate-y-[140%]">
-    <div class="bg-white rounded-[22px] shadow-pink border border-pink-100/70 p-3 flex items-center gap-3">
-      <div class="relative">
-        <div class="w-[48px] h-[48px] rounded-2xl bg-gradient-to-br from-[#d81b60] to-[#ff4081] flex items-center justify-center text-white shadow-lg shadow-pink-200">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M6 6h15l-1.5 8.5a2 2 0 0 1-2 1.5H8.5a2 2 0 0 1-2-1.5L5 3H3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9.5" cy="19.5" r="1.5" fill="currentColor"/><circle cx="17.5" cy="19.5" r="1.5" fill="currentColor"/></svg>
-        </div>
-        <span id="cartCount" class="absolute -top-1.5 -right-1.5 min-w-[22px] h-[22px] px-1 bg-[#111] text-white text-[11px] font-bold rounded-full grid place-items-center border-2 border-white">0</span>
-      </div>
-      <div class="flex-1 min-w-0">
-        <p class="text-[11px] text-gray-500 leading-none">Tạm tính • <span id="cartItemsText">0 món</span></p>
-        <p id="cartTotal" class="text-[22px] font-extrabold leading-tight tracking-tight">0đ</p>
-      </div>
-      <button id="openCart" class="h-[46px] px-5 rounded-2xl bg-[#111] text-white font-bold text-[14px] active:scale-95 transition">Xem giỏ</button>
-    </div>
+    <h1 class="text-[26px] font-bold leading-tight">Trà Sữa Như Say</h1>
+    <p class="text-gray-500 mt-1 mb-6">Hệ thống bán hàng</p>
+    <form id="login-form" class="space-y-4">
+      <input id="password" type="password" inputmode="numeric" pattern="[0-9]*" placeholder="Nhập mật khẩu" class="w-full h-[56px] px-4 rounded-2xl bg-gray-100 text-center tracking-[0.3em] text-[18px] font-medium outline-none focus:ring-2 focus:ring-pink-500" autocomplete="off">
+      <button type="submit" class="w-full h-[56px] rounded-2xl text-white font-bold text-[17px] active:scale-[0.98] transition shadow-lg" style="background:linear-gradient(135deg,#d81b60,#ff6b9d)">Đăng nhập</button>
+      <p id="login-error" class="text-red-500 text-[14px] h-5"></p>
+    </form>
   </div>
-
-  <!-- BOTTOM NAV -->
-  <nav class="fixed z-50 left-1/2 -translate-x-1/2 bottom-[max(14px,env(safe-area-inset-bottom))]">
-    <div class="flex items-center gap-1 bg-white/95 backdrop-blur-xl rounded-full p-1.5 shadow-big border border-gray-100">
-      <button data-tab="pos" class="nav-btn relative w-[64px] h-[52px] grid place-items-center rounded-full transition text-[#d81b60]">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V9.5z" fill="currentColor" opacity=".18"/><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V9.5z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
-        <span class="nav-dot absolute -bottom-0.5 w-1.5 h-1.5 rounded-full bg-[#d81b60]"></span>
-      </button>
-      <button data-tab="orders" class="nav-btn relative w-[64px] h-[52px] grid place-items-center rounded-full transition text-gray-400">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M9 5h6a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z" stroke="currentColor" stroke-width="1.8"/><path d="M9 5V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v1" stroke="currentColor" stroke-width="1.8"/><path d="M9 12h6M9 16h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-        <span class="nav-dot absolute -bottom-0.5 w-1.5 h-1.5 rounded-full bg-[#d81b60] opacity-0"></span>
-      </button>
-      <button data-tab="menu" class="nav-btn relative w-[64px] h-[52px] grid place-items-center rounded-full transition text-gray-400">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 6h14M4 12h12M4 18h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="18.5" cy="18.5" r="2.5" stroke="currentColor" stroke-width="1.6"/></svg>
-        <span class="nav-dot absolute -bottom-0.5 w-1.5 h-1.5 rounded-full bg-[#d81b60] opacity-0"></span>
-      </button>
-      <button data-tab="revenue" class="nav-btn relative w-[64px] h-[52px] grid place-items-center rounded-full transition text-gray-400">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 18V6c0-1.1.9-2 2-2h4v16H6a2 2 0 0 1-2-2z" fill="currentColor" opacity=".18"/><path d="M10 4h4v16h-4zM14 12h4v8h-4z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
-        <span class="nav-dot absolute -bottom-0.5 w-1.5 h-1.5 rounded-full bg-[#d81b60] opacity-0"></span>
-      </button>
-      <button data-tab="settings" class="nav-btn relative w-[64px] h-[52px] grid place-items-center rounded-full transition text-gray-400">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 6z" stroke="currentColor" stroke-width="1.8"/><path d="M19 12a7 7 0 0 1-.4 2.3l1.5 1.2-1.5 2.6-1.8-.7a7 7 0 0 1-2 .9l-.3 1.9h-3l-.3-1.9a7 7 0 0 1-2-.9l-1.8.7-1.5-2.6 1.5-1.2A7 7 0 0 1 5 12c0-.8.1-1.6.4-2.3L3.9 8.5l1.5-2.6 1.8.7a7 7 0 0 1 2-.9L9.5 3h3l.3 1.9a7 7 0 0 1 2 .9l1.8-.7 1.5 2.6-1.5 1.2c.3.7.4 1.5.4 2.3z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
-        <span class="nav-dot absolute -bottom-0.5 w-1.5 h-1.5 rounded-full bg-[#d81b60] opacity-0"></span>
-      </button>
-    </div>
-  </nav>
-
-  <!-- CART DRAWER -->
-  <div id="cartDrawer" class="fixed inset-0 z-[70] hidden">
-    <div id="cartBackdrop" class="absolute inset-0 bg-black/40 backdrop-blur-sm opacity-0 transition"></div>
-    <div id="cartPanel" class="absolute left-1/2 -translate-x-1/2 bottom-0 w-full max-w-[480px] bg-[#fafafa] rounded-t-[28px] shadow-big max-h-[88vh] flex flex-col translate-y-full transition-transform duration-300">
-      <div class="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mt-3 mb-2"></div>
-      <div class="px-5 py-2 flex items-center justify-between">
-        <div>
-          <h3 class="text-[18px] font-extrabold">Giỏ hàng</h3>
-          <p id="drawerTable" class="text-[12px] text-[#d81b60] font-semibold">Mang về</p>
-        </div>
-        <button id="closeCart" class="w-9 h-9 grid place-items-center rounded-full bg-gray-100 active:scale-90">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-        </button>
-      </div>
-      <div id="cartItems" class="flex-1 overflow-y-auto px-4 pb-3 space-y-2.5"></div>
-      <div class="px-4 pb-[calc(16px+env(safe-area-inset-bottom))] pt-3 bg-white/80 backdrop-blur-xl border-t border-gray-100 rounded-t-[24px]">
-        <div class="flex items-center justify-between mb-2">
-          <p class="text-[13px] text-gray-500">Ghi chú</p>
-          <input id="orderNote" placeholder="Ít đá, ít đường..." class="text-[13px] bg-gray-50 rounded-lg px-2.5 py-1.5 outline-none w-[60%] text-right">
-        </div>
-        <div class="flex items-center justify-between">
-          <p class="text-[14px] font-semibold text-gray-600">Tổng cộng</p>
-          <p id="drawerTotal" class="text-[26px] font-extrabold tracking-tight">0đ</p>
-        </div>
-        <div class="grid grid-cols-3 gap-2 mt-3">
-          <button data-pay="cash" class="pay-btn h-12 rounded-2xl bg-[#111] text-white font-bold active:scale-95">Tiền mặt</button>
-          <button data-pay="momo" class="pay-btn h-12 rounded-2xl bg-[#d81b60] text-white font-bold active:scale-95">MoMo</button>
-          <button data-pay="bank" class="pay-btn h-12 rounded-2xl bg-gray-200 text-gray-800 font-bold active:scale-95">Chuyển khoản</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- PRODUCT MODAL -->
-  <div id="productModal" class="fixed inset-0 z-[80] hidden">
-    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" id="productBackdrop"></div>
-    <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[calc(100%-32px)] max-w-[420px]">
-      <div class="bg-white rounded-[28px] p-5 shadow-big float-up">
-        <h3 id="pmTitle" class="text-[18px] font-extrabold mb-3">Thêm món</h3>
-        <div class="space-y-3">
-          <div>
-            <p class="text-[12px] text-gray-500 mb-1">Tên món</p>
-            <input id="pmName" class="w-full h-12 rounded-xl bg-gray-50 px-3 outline-none focus:ring-2 focus:ring-pink-200 font-medium">
-          </div>
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <p class="text-[12px] text-gray-500 mb-1">Giá (đ)</p>
-              <input id="pmPrice" type="number" class="w-full h-12 rounded-xl bg-gray-50 px-3 outline-none focus:ring-2 focus:ring-pink-200 font-medium">
-            </div>
-            <div>
-              <p class="text-[12px] text-gray-500 mb-1">Danh mục</p>
-              <select id="pmCat" class="w-full h-12 rounded-xl bg-gray-50 px-3 outline-none focus:ring-2 focus:ring-pink-200 font-medium">
-                <option>Trà Sữa</option>
-                <option>Trà Trái Cây</option>
-                <option>Sữa Tươi</option>
-                <option>Topping</option>
-                <option>Khác</option>
-              </select>
-            </div>
-          </div>
-          <div>
-            <p class="text-[12px] text-gray-500 mb-1">Emoji</p>
-            <input id="pmEmoji" class="w-full h-12 rounded-xl bg-gray-50 px-3 outline-none text-[22px]" value="🧋" maxlength="2">
-          </div>
-        </div>
-        <div class="grid grid-cols-2 gap-2 mt-4">
-          <button id="pmCancel" class="h-12 rounded-xl bg-gray-100 font-bold active:scale-95">Hủy</button>
-          <button id="pmSave" class="h-12 rounded-xl bg-gradient-to-r from-[#d81b60] to-[#ff4081] text-white font-bold shadow-pink active:scale-95">Lưu</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- SUCCESS CHECK -->
-  <div id="successPop" class="fixed z-[100] left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-0">
-    <div class="w-[84px] h-[84px] rounded-full bg-white shadow-big grid place-items-center">
-      <svg width="44" height="44" viewBox="0 0 44 44" fill="none">
-        <circle cx="22" cy="22" r="20" stroke="#d81b60" stroke-opacity=".15" stroke-width="4"/>
-        <path d="M14 22.5l5.5 5.5 10.5-11" stroke="#d81b60" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" class="check-path"/>
-      </svg>
-    </div>
-  </div>
-
 </div>
 
-<script type="module">
-  // ===== Firebase Integration (keep paths, disabled by default to avoid console errors) =====
-  const ENABLE_FIREBASE = false;
-  let db = null;
-  if (ENABLE_FIREBASE) {
-    const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
-    const { getDatabase, ref, onValue, set, push, update } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js");
-    const firebaseConfig = { /* fill your config */ databaseURL: "https://nhusay-pos-default-rtdb.firebaseio.com" };
-    const app = initializeApp(firebaseConfig);
-    db = getDatabase(app);
-    // Paths: nhusay-pos/products, nhusay-pos/orders, nhusay-pos/settings
-    window._fb = { ref, onValue, set, push, update, db };
-  }
-
-  // ===== State =====
-  const $ = (s, r=document)=>r.querySelector(s);
-  const $$ = (s, r=document)=>[...r.querySelectorAll(s)];
-  const fmt = n => (n||0).toLocaleString('vi-VN') + 'đ';
-  const uid = () => Math.random().toString(36).slice(2,9);
-
-  let products = JSON.parse(localStorage.getItem('ns_products')||'null') || [
-    {id:'ts1',name:'Trà Sữa Truyền Thống',cat:'Trà Sữa',price:35000,emoji:'🧋',active:true},
-    {id:'ts2',name:'Trà Sữa Thái Xanh',cat:'Trà Sữa',price:38000,emoji:'🧋',active:true},
-    {id:'ts3',name:'Trà Sữa Socola',cat:'Trà Sữa',price:40000,emoji:'🍫',active:true},
-    {id:'tt1',name:'Trà Đào Cam Sả',cat:'Trà Trái Cây',price:38000,emoji:'🍑',active:true},
-    {id:'tt2',name:'Trà Vải Hoa Hồng',cat:'Trà Trái Cây',price:38000,emoji:'🌸',active:true},
-    {id:'tt3',name:'Trà Chanh Dây',cat:'Trà Trái Cây',price:35000,emoji:'🍋',active:true},
-    {id:'st1',name:'Sữa Tươi TC Đường Đen',cat:'Sữa Tươi',price:45000,emoji:'🥛',active:true},
-    {id:'st2',name:'Sữa Tươi Khoai Môn',cat:'Sữa Tươi',price:42000,emoji:'💜',active:true},
-    {id:'tp1',name:'Trân Châu Đen',cat:'Topping',price:8000,emoji:'⚫',active:true},
-    {id:'tp2',name:'Thạch Phô Mai',cat:'Topping',price:10000,emoji:'🧀',active:true},
-    {id:'tp3',name:'Pudding Trứng',cat:'Topping',price:10000,emoji:'🍮',active:true},
-    {id:'kx1',name:'Matcha Latte',cat:'Khác',price:45000,emoji:'🍵',active:true},
-  ];
-  let orders = JSON.parse(localStorage.getItem('ns_orders')||'[]');
-  let cart = [];
-  let selectedTable = localStorage.getItem('ns_table') || 'Mang về';
-  let selectedCat = 'Tất cả';
-  let orderFilter = 'doing';
-  const tables = ['Mang về','Bàn 1','Bàn 2','Bàn 3','Bàn 4','Bàn 5','Bàn 6','Bàn 7','Bàn 8','Bàn 9','Bàn 10'];
-  const categories = ['Tất cả','Trà Sữa','Trà Trái Cây','Sữa Tươi','Topping','Khác'];
-  const PASSWORD = '260426';
-
-  // ===== Init UI =====
-  function saveAll(){
-    localStorage.setItem('ns_products', JSON.stringify(products));
-    localStorage.setItem('ns_orders', JSON.stringify(orders));
-    localStorage.setItem('ns_table', selectedTable);
-  }
-
-  function renderTables(){
-    const wrap = $('#tableScroll');
-    wrap.innerHTML = tables.map(t=>`
-      <button data-table="${t}" class="table-btn px-4 h-9 rounded-full text-[13px] font-semibold whitespace-nowrap transition active:scale-95 ${t===selectedTable?'bg-white text-[#d81b60] shadow-soft':'bg-white/15 text-white/90 hover:bg-white/25'}">${t}</button>
-    `).join('');
-    $('#tableHint').textContent = selectedTable;
-    $$('.table-btn',wrap).forEach(b=>b.onclick=()=>{
-      selectedTable=b.dataset.table;
-      renderTables(); $('#drawerTable').textContent=selectedTable;
-      saveAll();
-    });
-  }
-
-  function renderCats(){
-    const wrap = $('#categoryScroll');
-    wrap.innerHTML = categories.map(c=>`
-      <button data-cat="${c}" class="cat-btn px-4 h-[38px] rounded-full text-[14px] font-semibold whitespace-nowrap transition active:scale-95 ${c===selectedCat?'bg-gradient-to-r from-[#d81b60] to-[#ff4081] text-white shadow-pink':'bg-white text-gray-700 shadow-soft'}">${c}</button>
-    `).join('');
-    $$('.cat-btn',wrap).forEach(b=>b.onclick=()=>{selectedCat=b.dataset.cat;renderCats();renderProducts()});
-  }
-
-  function renderProducts(){
-    const grid = $('#productGrid');
-    const list = products.filter(p=>p.active && (selectedCat==='Tất cả'||p.cat===selectedCat));
-    $('#emptyProducts').classList.toggle('hidden', list.length>0);
-    grid.innerHTML = list.map(p=>`
-      <article class="group relative bg-white rounded-[20px] p-4 shadow-soft active:scale-[0.97] transition duration-150">
-        <div class="flex justify-center">
-          <div class="w-[76px] h-[76px] rounded-full bg-gradient-to-br from-[#ffe4ef] to-[#fff1f6] grid place-items-center text-[32px] ring-1 ring-pink-100/70">${p.emoji||'🧋'}</div>
-        </div>
-        <h3 class="mt-3 font-bold text-[15px] leading-snug line-clamp-2 min-h-[40px]">${p.name}</h3>
-        <p class="text-[11px] text-gray-400 mt-0.5">${p.cat}</p>
-        <div class="flex items-end justify-between mt-3">
-          <p class="text-[22px] font-extrabold text-[#d81b60] leading-none tracking-tight">${Math.round(p.price/1000)}k</p>
-          <button data-add="${p.id}" class="add-btn w-10 h-10 rounded-full bg-gradient-to-br from-[#d81b60] to-[#ff4081] text-white grid place-items-center shadow-[0_6px_16px_rgba(216,27,96,.35)] active:scale-90 transition">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-          </button>
-        </div>
-      </article>
-    `).join('');
-    $$('.add-btn',grid).forEach(btn=>{
-      btn.onclick = (e)=>{
-        const id = btn.dataset.add;
-        const p = products.find(x=>x.id===id);
-        addToCart(p, btn);
-      };
-    });
-  }
-
-  function addToCart(p, btn){
-    const ex = cart.find(i=>i.id===p.id);
-    if(ex) ex.qty++; else cart.push({id:p.id,name:p.name,price:p.price,qty:1,emoji:p.emoji});
-    updateCartUI();
-    // pulse animation
-    btn.classList.add('pulse-ring');
-    setTimeout(()=>btn.classList.remove('pulse-ring'),550);
-    // success
-    showSuccess();
-    navigator.vibrate?.(10);
-  }
-
-  function showSuccess(){
-    const el = $('#successPop');
-    el.classList.remove('opacity-0');
-    el.classList.add('animate-pop');
-    setTimeout(()=>{el.classList.add('opacity-0');el.classList.remove('animate-pop')},700);
-  }
-
-  function updateCartUI(){
-    const count = cart.reduce((s,i)=>s+i.qty,0);
-    const total = cart.reduce((s,i)=>s+i.qty*i.price,0);
-    $('#cartCount').textContent = count;
-    $('#cartItemsText').textContent = `${count} món`;
-    $('#cartTotal').textContent = fmt(total);
-    $('#drawerTotal').textContent = fmt(total);
-    const bar = $('#cartBar');
-    if(count>0){bar.classList.remove('translate-y-[140%]')} else {bar.classList.add('translate-y-[140%]')}
-    renderCartItems();
-  }
-
-  function renderCartItems(){
-    const wrap = $('#cartItems');
-    if(cart.length===0){
-      wrap.innerHTML = `<div class="py-16 text-center text-gray-500">Giỏ trống</div>`; return;
-    }
-    wrap.innerHTML = cart.map(it=>`
-      <div class="bg-white rounded-[18px] p-3 shadow-soft flex items-center gap-3">
-        <div class="w-12 h-12 rounded-xl bg-pink-50 grid place-items-center text-[22px]">${it.emoji}</div>
-        <div class="flex-1 min-w-0">
-          <p class="font-semibold text-[14px] leading-tight truncate">${it.name}</p>
-          <p class="text-[13px] text-[#d81b60] font-bold">${fmt(it.price)}</p>
-        </div>
-        <div class="flex items-center gap-2">
-          <button data-dec="${it.id}" class="w-8 h-8 grid place-items-center rounded-full bg-gray-100 active:scale-90 font-bold">−</button>
-          <span class="w-6 text-center font-extrabold">${it.qty}</span>
-          <button data-inc="${it.id}" class="w-8 h-8 grid place-items-center rounded-full bg-[#111] text-white active:scale-90 font-bold">+</button>
-        </div>
+<div id="app" class="hidden h-[100dvh] flex flex-col max-w-[480px] mx-auto bg-gray-50 relative">
+  <header class="shrink-0 text-white shadow-lg relative z-30" style="background:linear-gradient(135deg,#d81b60,#ff6b9d); padding-top:env(safe-area-inset-top)">
+    <div class="flex items-center gap-3 px-4 pt-3 pb-2">
+      <div class="w-10 h-10 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M8 7V5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M7 7h10l1 9a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2l1-9z"/></svg>
       </div>
-    `).join('');
-    $$('[data-dec]',wrap).forEach(b=>b.onclick=()=>{const id=b.dataset.dec;const it=cart.find(x=>x.id===id);it.qty--;if(it.qty<=0)cart=cart.filter(x=>x.id!==id);updateCartUI()});
-    $$('[data-inc]',wrap).forEach(b=>b.onclick=()=>{const id=b.dataset.inc;cart.find(x=>x.id===id).qty++;updateCartUI()});
-  }
-
-  // Cart drawer
-  const drawer = $('#cartDrawer'), panel = $('#cartPanel'), backdrop = $('#cartBackdrop');
-  function openCart(){drawer.classList.remove('hidden');requestAnimationFrame(()=>{backdrop.classList.add('opacity-100');panel.classList.remove('translate-y-full')});$('#drawerTable').textContent=selectedTable}
-  function closeCart(){backdrop.classList.remove('opacity-100');panel.classList.add('translate-y-full');setTimeout(()=>drawer.classList.add('hidden'),280)}
-  $('#openCart').onclick=openCart; $('#closeCart').onclick=closeCart; backdrop.onclick=closeCart;
-
-  // Checkout
-  $$('.pay-btn').forEach(b=>b.onclick=()=>{
-    if(cart.length===0) return;
-    const total = cart.reduce((s,i)=>s+i.qty*i.price,0);
-    const order = {
-      id: uid(),
-      table: selectedTable,
-      items: JSON.parse(JSON.stringify(cart)),
-      total,
-      note: $('#orderNote').value.trim(),
-      pay: b.dataset.pay,
-      status: 'doing',
-      time: Date.now()
-    };
-    orders.unshift(order); saveAll();
-    cart=[]; updateCartUI(); closeCart(); showSuccess();
-    switchTab('orders'); renderOrders(); renderRevenue();
-    // Firebase push (if enabled)
-    if(ENABLE_FIREBASE && window._fb){ const {ref,push,set,db}=window._fb; set(ref(db,'nhusay-pos/orders/'+order.id), order); }
-  });
-
-  // Orders
-  function renderOrders(){
-    const list = orders.filter(o=> orderFilter==='doing' ? o.status==='doing' : o.status==='done');
-    $('#emptyOrders').classList.toggle('hidden', list.length>0);
-    $('#ordersList').innerHTML = list.map(o=>`
-      <div class="bg-white rounded-[20px] p-4 shadow-soft">
-        <div class="flex items-start justify-between">
-          <div>
-            <p class="font-extrabold">${o.table} • <span class="text-[#d81b60]">${fmt(o.total)}</span></p>
-            <p class="text-[12px] text-gray-500 mt-0.5">${new Date(o.time).toLocaleString('vi-VN',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'})} • ${o.pay==='cash'?'Tiền mặt':o.pay==='momo'?'MoMo':'CK'}</p>
-          </div>
-          <span class="px-2.5 py-1 rounded-full text-[11px] font-bold ${o.status==='doing'?'bg-amber-100 text-amber-700':'bg-emerald-100 text-emerald-700'}">${o.status==='doing'?'Đang làm':'Xong'}</span>
-        </div>
-        <div class="mt-2.5 space-y-1">
-          ${o.items.map(i=>`<div class="flex justify-between text-[13px]"><span class="text-gray-600">${i.qty}× ${i.name}</span><span class="font-medium">${fmt(i.qty*i.price)}</span></div>`).join('')}
-          ${o.note?`<p class="text-[12px] text-gray-500 italic mt-1">Ghi chú: ${o.note}</p>`:''}
-        </div>
-        <div class="flex gap-2 mt-3">
-          ${o.status==='doing'?`<button data-done="${o.id}" class="flex-1 h-10 rounded-xl bg-[#111] text-white font-bold active:scale-[.98]">Hoàn thành</button>`:''}
-          <button data-print="${o.id}" class="h-10 px-3 rounded-xl bg-gray-100 font-semibold active:scale-95">In bill</button>
-        </div>
+      <div>
+        <h1 class="text-[20px] font-bold leading-none">Trà Sữa Như Say</h1>
+        <p class="text-[12px] text-white/80">POS Mobile</p>
       </div>
-    `).join('');
-    $$('[data-done]').forEach(b=>b.onclick=()=>{const o=orders.find(x=>x.id===b.dataset.done);o.status='done';saveAll();renderOrders();renderRevenue()});
-    $$('[data-print]').forEach(b=>b.onclick=()=>{const o=orders.find(x=>x.id===b.dataset.print);printBill(o)});
-  }
-  $$('.order-tab').forEach(t=>t.onclick=()=>{$$('.order-tab').forEach(x=>x.classList.remove('bg-[#d81b60]','text-white'));t.classList.add('bg-[#d81b60]','text-white');orderFilter=t.dataset.ordertab;renderOrders()});
+    </div>
+    <div id="table-scroll" class="flex gap-2 overflow-x-auto no-scrollbar px-3 pb-3 pt-1"></div>
+  </header>
 
-  function printBill(o){
-    const w = window.open('','_blank');
-    w.document.write(`<pre style="font-family:monospace;font-size:14px">TRÀ SỮA NHƯ SAY
-------------------------
-${o.table} - ${new Date(o.time).toLocaleString('vi-VN')}
-------------------------
-${o.items.map(i=>`${i.qty}x ${i.name.padEnd(18)} ${fmt(i.qty*i.price)}`).join('\n')}
-------------------------
-TONG: ${fmt(o.total)}
-TT: ${o.pay}
-${o.note?`Ghi chu: ${o.note}\n`:''}
-Cam on quy khach!
-</pre>`); w.print(); w.close();
-  }
-
-  // Menu
-  function renderMenu(){
-    const wrap = $('#menuList');
-    wrap.innerHTML = products.map(p=>`
-      <div class="bg-white rounded-[18px] p-3 shadow-soft flex items-center gap-3">
-        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-pink-50 to-rose-50 grid place-items-center text-[22px]">${p.emoji}</div>
-        <div class="flex-1 min-w-0">
-          <p class="font-bold leading-tight truncate">${p.name}</p>
-          <p class="text-[12px] text-gray-500">${p.cat} • <span class="text-[#d81b60] font-bold">${fmt(p.price)}</span></p>
-        </div>
-        <label class="relative inline-flex cursor-pointer">
-          <input type="checkbox" ${p.active?'checked':''} data-toggle="${p.id}" class="sr-only peer">
-          <div class="w-11 h-6 bg-gray-200 rounded-full peer-checked:bg-[#d81b60] transition"></div>
-          <div class="absolute top-[2px] left-[2px] w-5 h-5 bg-white rounded-full transition peer-checked:translate-x-5"></div>
-        </label>
-        <button data-edit="${p.id}" class="w-9 h-9 grid place-items-center rounded-xl bg-gray-50 active:scale-90">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
-        </button>
+  <div class="bg-white sticky top-0 z-20 border-b border-gray-100">
+    <div class="p-3 pb-2">
+      <div class="relative">
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <input id="search" type="search" placeholder="Tìm trà sữa, topping..." class="w-full h-11 pl-10 pr-4 rounded-xl bg-gray-100 text-[16px] outline-none focus:ring-2 focus:ring-pink-500 focus:bg-white transition" />
       </div>
-    `).join('');
-    $$('[data-toggle]',wrap).forEach(ch=>ch.onchange=()=>{const p=products.find(x=>x.id===ch.dataset.toggle);p.active=ch.checked;saveAll();renderProducts()});
-    $$('[data-edit]',wrap).forEach(b=>b.onclick=()=>openProductModal(products.find(x=>x.id===b.dataset.edit)));
-  }
+    </div>
+    <div id="category-scroll" class="flex gap-2 overflow-x-auto no-scrollbar px-3 pb-3"></div>
+  </div>
 
-  // Product modal
-  let editingId = null;
-  const pm = $('#productModal');
-  function openProductModal(p=null){
-    editingId = p?.id||null;
-    $('#pmTitle').textContent = p?'Sửa món':'Thêm món';
-    $('#pmName').value = p?.name||'';
-    $('#pmPrice').value = p?.price||'';
-    $('#pmCat').value = p?.cat||'Trà Sữa';
-    $('#pmEmoji').value = p?.emoji||'🧋';
-    pm.classList.remove('hidden');
-  }
-  function closeProductModal(){pm.classList.add('hidden')}
-  $('#productBackdrop').onclick=closeProductModal; $('#pmCancel').onclick=closeProductModal;
-  $('#pmSave').onclick=()=>{
-    const name=$('#pmName').value.trim(); const price=parseInt($('#pmPrice').value)||0; const cat=$('#pmCat').value; const emoji=$('#pmEmoji').value||'🧋';
-    if(!name||!price) return;
-    if(editingId){ const p=products.find(x=>x.id===editingId); Object.assign(p,{name,price,cat,emoji}); }
-    else { products.unshift({id:uid(),name,price,cat,emoji,active:true}); }
-    saveAll(); closeProductModal(); renderMenu(); renderProducts(); renderCats();
-  };
-  $('#addProductBtn').onclick=()=>openProductModal();
+  <main class="flex-1 overflow-y-auto">
+    <section id="tab-ban-hang" class="p-3 pb-[180px]"><div id="product-grid" class="grid grid-cols-2 gap-3"></div></section>
+    <section id="tab-don" class="hidden p-3 pb-[120px]"><div class="flex items-center justify-between mb-3"><h2 class="text-lg font-bold">Đơn hàng hôm nay</h2><span id="orders-count" class="text-sm text-gray-500"></span></div><div id="orders-list" class="space-y-2"></div></section>
+    <section id="tab-menu" class="hidden p-3 pb-[120px]"><div class="flex items-center justify-between mb-3"><h2 class="text-lg font-bold">Quản lý Menu</h2><button id="btn-add-product" class="h-9 px-3 rounded-xl text-white text-sm font-medium" style="background:linear-gradient(135deg,#d81b60,#ff6b9d)">+ Thêm món</button></div><div id="menu-list" class="space-y-2"></div></section>
+    <section id="tab-doanh-thu" class="hidden p-3 pb-[120px]"><h2 class="text-lg font-bold mb-3">Doanh thu hôm nay</h2><div class="grid grid-cols-2 gap-3 mb-4"><div class="bg-white rounded-2xl p-4 shadow-sm"><div class="text-xs text-gray-500">Tổng bán</div><div id="rev-total" class="text-2xl font-bold text-pink-600 mt-1">0đ</div></div><div class="bg-white rounded-2xl p-4 shadow-sm"><div class="text-xs text-gray-500">Số đơn</div><div id="rev-count" class="text-2xl font-bold mt-1">0</div></div></div><div class="bg-white rounded-2xl p-4 shadow-sm"><div class="text-sm font-semibold mb-2">Món bán chạy</div><div id="rev-top" class="space-y-1.5 text-sm"></div></div></section>
+    <section id="tab-cai-dat" class="hidden p-3 pb-[120px]"><h2 class="text-lg font-bold mb-3">Cài đặt</h2><div class="bg-white rounded-2xl p-4 shadow-sm"><div class="font-semibold">Trà Sữa Như Say</div><div class="text-sm text-gray-500 mt-1">Đồng bộ với bản PC qua Firebase</div></div></section>
+  </main>
 
-  // Revenue
-  function renderRevenue(){
-    const now = new Date();
-    const startToday = new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime();
-    const startMonth = new Date(now.getFullYear(),now.getMonth(),1).getTime();
-    const todayOrders = orders.filter(o=>o.time>=startToday && o.status==='done');
-    const monthOrders = orders.filter(o=>o.time>=startMonth && o.status==='done');
-    const sum = arr=>arr.reduce((s,o)=>s+o.total,0);
-    $('#revToday').textContent = fmt(sum(todayOrders));
-    $('#revTodayOrders').textContent = `${todayOrders.length} đơn`;
-    $('#revMonth').textContent = fmt(sum(monthOrders));
-    $('#revMonthOrders').textContent = `${monthOrders.length} đơn`;
-    // chart 7 days
-    const chart = $('#revChart'); chart.innerHTML='';
-    for(let i=6;i>=0;i--){
-      const d = new Date(); d.setDate(d.getDate()-i); const s = new Date(d.getFullYear(),d.getMonth(),d.getDate()).getTime(); const e = s+86400000;
-      const v = sum(orders.filter(o=>o.time>=s&&o.time<e&&o.status==='done'));
-      const h = Math.max(8, Math.min(110, v/50000*20+8));
-      chart.innerHTML += `<div class="flex-1 flex flex-col items-center gap-1">
-        <div class="w-full rounded-t-lg bg-gradient-to-t from-[#d81b60]/20 to-[#ff4081]/80" style="height:${h}px"></div>
-        <span class="text-[10px] text-gray-500">${d.getDate()}/${d.getMonth()+1}</span>
-      </div>`;
-    }
-    // top products
-    const map = new Map();
-    orders.filter(o=>o.status==='done').forEach(o=>o.items.forEach(i=>map.set(i.name,(map.get(i.name)||0)+i.qty)));
-    const top = [...map.entries()].sort((a,b)=>b[1]-a[1]).slice(0,5);
-    $('#topProducts').innerHTML = top.length? top.map(([name,qty])=>`<div class="flex justify-between text-[14px]"><span class="text-gray-700">${name}</span><span class="font-bold text-[#d81b60]">${qty}</span></div>`).join('') : `<p class="text-[13px] text-gray-500">Chưa có dữ liệu</p>`;
-  }
+  <div id="cart-bar" class="fixed left-0 right-0 z-30 max-w-[480px] mx-auto" style="bottom:72px; display:none"><div class="mx-3 mb-2"><div id="cart-bar-inner" class="card-pop p-3 flex items-center justify-between active:scale-[0.98] transition"><div class="flex items-center gap-3"><div class="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold shadow-md relative" style="background:linear-gradient(135deg,#d81b60,#ff6b9d)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M9 8h-3l4-4 4 4h-3v8h-2z"/><circle cx="8.5" cy="19.5" r="1.5"/><circle cx="17.5" cy="19.5" r="1.5"/></svg><span id="cart-count" class="absolute -top-1.5 -right-1.5 bg-yellow-400 text-[11px] text-gray-900 font-bold w-5 h-5 rounded-full flex items-center justify-center">0</span></div><div><div class="text-[12px] text-gray-500 leading-none">Giỏ hàng</div><div id="cart-total" class="text-[18px] font-bold text-pink-600 leading-tight">0đ</div></div></div><button id="btn-checkout" class="h-12 px-6 rounded-xl text-white font-bold text-[15px] shadow-md active:scale-95" style="background:linear-gradient(135deg,#d81b60,#ff6b9d)">Thanh toán</button></div></div></div>
 
-  // Settings
-  $('#pwBtn').onclick=()=>{const v=$('#pwInput').value; if(v===PASSWORD){$('#settingsLock').classList.add('hidden');$('#settingsContent').classList.remove('hidden')} else {$('#pwError').classList.remove('hidden'); setTimeout(()=>$('#pwError').classList.add('hidden'),1500)}};
-  $('#saveStore').onclick=()=>{const name=$('#storeName').value.trim()||'Trà Sữa Như Say'; document.querySelector('h1').textContent=name; localStorage.setItem('ns_store',name); showSuccess()};
-  $('#exportData').onclick=()=>{const data={products,orders,store:localStorage.getItem('ns_store')}; const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='nhusay-pos.json'; a.click()};
-  $('#clearData').onclick=()=>{if(confirm('Xóa toàn bộ dữ liệu?')){localStorage.clear();location.reload()}};
+  <nav class="fixed bottom-0 left-0 right-0 z-30 nav-float max-w-[480px] mx-auto safe-bottom">
+    <div class="grid grid-cols-5 h-[72px]">
+      <button data-tab="ban-hang" class="tab-btn flex flex-col items-center justify-center gap-1 text-[11px] font-medium text-pink-600"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg><span>Bán hàng</span></button>
+      <button data-tab="don" class="tab-btn flex flex-col items-center justify-center gap-1 text-[11px] font-medium text-gray-400"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg><span>Đơn</span></button>
+      <button data-tab="menu" class="tab-btn flex flex-col items-center justify-center gap-1 text-[11px] font-medium text-gray-400"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg><span>Menu</span></button>
+      <button data-tab="doanh-thu" class="tab-btn flex flex-col items-center justify-center gap-1 text-[11px] font-medium text-gray-400"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg><span>Doanh thu</span></button>
+      <button data-tab="cai-dat" class="tab-btn flex flex-col items-center justify-center gap-1 text-[11px] font-medium text-gray-400"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 001.82.33h.01a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51h.01a1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82v.01a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg><span>Cài đặt</span></button>
+    </div>
+  </nav>
+</div>
 
-  // Tabs
-  function switchTab(tab){
-    ['pos','orders','menu','revenue','settings'].forEach(t=>$('#view-'+t).classList.toggle('hidden', t!==tab));
-    $$('.nav-btn').forEach(b=>{
-      const active = b.dataset.tab===tab;
-      b.classList.toggle('text-[#d81b60]',active);
-      b.classList.toggle('text-gray-400',!active);
-      b.querySelector('.nav-dot').classList.toggle('opacity-0',!active);
-      b.querySelector('.nav-dot').classList.toggle('opacity-100',active);
-    });
-    if(tab==='orders') renderOrders();
-    if(tab==='menu') renderMenu();
-    if(tab==='revenue') renderRevenue();
-  }
-  $$('.nav-btn').forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
+<div id="cart-sheet" class="fixed inset-0 z-50 hidden"><div id="cart-backdrop" class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div><div id="cart-panel" class="absolute bottom-0 left-0 right-0 bg-white rounded-t-[28px] max-h-[85vh] flex flex-col translate-y-full transition-transform duration-300 max-w-[480px] mx-auto shadow-2xl"><div class="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mt-3 shrink-0"></div><div class="flex items-center justify-between px-4 py-3 border-b shrink-0"><h3 class="text-[18px] font-bold">Giỏ hàng • <span id="cart-table-name" class="text-pink-600">Mang về</span></h3><button id="cart-close" class="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center active:scale-90">✕</button></div><div id="cart-items" class="flex-1 overflow-y-auto p-3 space-y-2"></div><div class="p-4 border-t bg-gray-50 safe-bottom shrink-0"><div class="flex justify-between items-center mb-3"><span class="text-[15px] font-medium text-gray-600">Tổng cộng</span><span id="cart-sheet-total" class="text-[24px] font-bold text-pink-600">0đ</span></div><button id="cart-checkout" class="w-full h-[52px] rounded-2xl text-white font-bold text-[17px] shadow-lg active:scale-[0.98]" style="background:linear-gradient(135deg,#d81b60,#ff6b9d)">Xác nhận thanh toán</button></div></div></div>
 
-  // Init
-  function init(){
-    const savedName = localStorage.getItem('ns_store'); if(savedName) document.querySelector('h1').textContent=savedName;
-    renderTables(); renderCats(); renderProducts(); updateCartUI(); renderOrders(); renderMenu(); renderRevenue();
-    // Load Firebase if enabled
-    if(ENABLE_FIREBASE && window._fb){
-      const {ref,onValue,db}=window._fb;
-      onValue(ref(db,'nhusay-pos/products'), snap=>{ const v=snap.val(); if(v){ products = Object.values(v); saveAll(); renderProducts(); renderMenu(); }});
-    }
-  }
-  init();
+<div id="success" class="fixed inset-0 z-[60] hidden items-center justify-center p-6 bg-black/60 backdrop-blur-sm"><div class="bg-white rounded-[28px] p-7 w-full max-w-[320px] text-center shadow-2xl"><div class="w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-4" style="background:linear-gradient(135deg,#d81b60,#ff6b9d)"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div><h3 class="text-[22px] font-bold">Thành công!</h3><p id="success-id" class="text-gray-500 mt-1 text-[14px]"></p><p id="success-total" class="text-[28px] font-bold text-pink-600 mt-2"></p><div class="grid grid-cols-2 gap-3 mt-6"><button id="success-done" class="h-12 rounded-xl bg-gray-100 font-semibold text-[15px] active:scale-95">Xong</button><button id="success-print" class="h-12 rounded-xl text-white font-semibold text-[15px] shadow-md active:scale-95" style="background:linear-gradient(135deg,#d81b60,#ff6b9d)">In bill</button></div></div></div>
 
-  // Prevent double-tap zoom, smooth scroll
-  document.addEventListener('touchstart',()=>{}, {passive:true});
+<script>
+const $ = id => document.getElementById(id);
+const state = { table:'Mang về', cart:[], products:[], categories:['Tất cả'], orders:[], search:'', activeCategory:'Tất cả', tables:['Mang về','Bàn 1','Bàn 2','Bàn 3','Bàn 4','Bàn 5','Bàn 6','Bàn 7','Bàn 8','Bàn 9','Bàn 10'], currentTab:'ban-hang', lastOrder:null };
+
+const SAMPLE_MENU = [
+  {id:'ts01', name:'Trà Sữa Truyền Thống', price:25000, category:'Trà Sữa', active:true},
+  {id:'ts02', name:'Trà Sữa Thái Xanh', price:28000, category:'Trà Sữa', active:true},
+  {id:'ts03', name:'Hồng Trà Sữa', price:27000, category:'Trà Sữa', active:true},
+  {id:'tt01', name:'Trà Đào Cam Sả', price:26000, category:'Trà Trái Cây', active:true},
+  {id:'tp01', name:'Trân Châu Đen', price:5000, category:'Topping', active:true},
+];
+
+const firebaseConfig = {
+  apiKey: "AIzaSyABseQ0_Me77MUWnu8ezVtcfCAS4XlRBjs",
+  authDomain: "trasua-nhusay-d6708.firebaseapp.com",
+  databaseURL: "https://trasua-nhusay-d6708-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "trasua-nhusay-d6708",
+  storageBucket: "trasua-nhusay-d6708.firebasestorage.app",
+  messagingSenderId: "626489476647",
+  appId: "1:626489476647:web:65d82a552ad1bdb5d9b002"
+};
+let db=null; try{ firebase.initializeApp(firebaseConfig); db=firebase.database(); }catch(e){}
+
+function formatPrice(n){ return new Intl.NumberFormat('vi-VN').format(n)+'đ'; }
+function init(){ renderTables(); loadData(); bindEvents(); $('cart-table-name').textContent=state.table; }
+
+function loadData(){
+  if(db){
+    db.ref('nhusay-pos/menu').on('value', snap=>{ const val=snap.val(); state.products = val?Object.entries(val).map(([k,v])=>({...v, id:v.id||k})):SAMPLE_MENU; if(!val){ SAMPLE_MENU.forEach(p=>db.ref('nhusay-pos/menu/'+p.id).set(p)); } updateCategories(); renderProducts(); renderMenuList(); });
+    db.ref('nhusay-pos/orders').limitToLast(200).on('value', snap=>{ const val=snap.val(); state.orders = val?Object.values(val).sort((a,b)=>b.timestamp-a.timestamp):[]; renderOrders(); renderRevenue(); });
+    db.ref('nhusay-pos/settings/tables').on('value', snap=>{ if(snap.exists()){ const val=snap.val(); state.tables = Array.isArray(val)?val:Object.values(val); renderTables(); } });
+  } else { state.products=SAMPLE_MENU; updateCategories(); renderProducts(); renderMenuList(); renderOrders(); renderRevenue(); }
+}
+
+function updateCategories(){ const cats=['Tất cả',...new Set(state.products.filter(p=>p.active!==false).map(p=>p.category))]; state.categories=cats; renderCategories(); }
+function renderTables(){ const wrap=$('table-scroll'); wrap.innerHTML=''; state.tables.forEach(t=>{ const btn=document.createElement('button'); const active=t===state.table; btn.className=`px-4 h-9 rounded-full text-[14px] font-medium whitespace-nowrap transition ${active?'bg-white text-pink-600 shadow-md':'bg-white/20 text-white backdrop-blur border border-white/30'}`; btn.textContent=t; btn.onclick=()=>{ state.table=t; $('cart-table-name').textContent=t; renderTables(); }; wrap.appendChild(btn); }); }
+function renderCategories(){ const wrap=$('category-scroll'); wrap.innerHTML=''; state.categories.forEach(c=>{ const btn=document.createElement('button'); const active=c===state.activeCategory; btn.className=`px-4 h-9 rounded-full text-[14px] font-medium whitespace-nowrap transition ${active?'pill-active':'bg-gray-100 text-gray-700'}`; btn.textContent=c; btn.onclick=()=>{ state.activeCategory=c; renderCategories(); renderProducts(); }; wrap.appendChild(btn); }); }
+function renderProducts(){ const grid=$('product-grid'); grid.innerHTML=''; const kw=state.search.toLowerCase(); const list=state.products.filter(p=>p.active!==false && (state.activeCategory==='Tất cả'||p.category===state.activeCategory) && (!kw||p.name.toLowerCase().includes(kw))); list.forEach(p=>{ const btn=document.createElement('button'); btn.className='card-pop p-3.5 text-left active:scale-[0.97] transition min-h-[110px] flex flex-col justify-between'; btn.innerHTML=`<div class='flex gap-3'><div class='product-img'>🧋</div><div class='flex-1'><div class='text-[14px] font-bold leading-snug line-clamp-2'>${p.name}</div><div class='text-[11px] text-gray-500 mt-0.5'>${p.category}</div></div></div><div class='flex items-center justify-between mt-3'><span class='text-[18px] font-bold' style='color:#d81b60'>${formatPrice(p.price)}</span><span class='w-8 h-8 rounded-full flex items-center justify-center text-white shadow-md' style='background:linear-gradient(135deg,#d81b60,#ff4081)'>+</span></div>`; btn.onclick=()=>addToCart(p); grid.appendChild(btn); }); if(list.length===0){ grid.innerHTML=`<div class="col-span-2 text-center py-12 text-gray-400">Không tìm thấy món</div>`; } }
+function addToCart(p){ const i=state.cart.findIndex(x=>x.id===p.id); if(i>=0) state.cart[i].qty++; else state.cart.push({id:p.id,name:p.name,price:p.price,qty:1}); updateCartUI(); if(navigator.vibrate) navigator.vibrate(10); }
+function updateCartUI(){ const total=state.cart.reduce((s,i)=>s+i.price*i.qty,0); const count=state.cart.reduce((s,i)=>s+i.qty,0); $('cart-count').textContent=count; $('cart-total').textContent=formatPrice(total); $('cart-sheet-total').textContent=formatPrice(total); $('cart-bar').style.display=count>0?'block':'none'; renderCartItems(); }
+function renderCartItems(){ const wrap=$('cart-items'); wrap.innerHTML=''; if(state.cart.length===0){ wrap.innerHTML=`<div class="text-center py-16 text-gray-400">Chưa có món nào</div>`; return; } state.cart.forEach((item,idx)=>{ const div=document.createElement('div'); div.className='flex items-center gap-3 bg-gray-50 rounded-2xl p-3'; div.innerHTML=`<div class="flex-1"><div class="font-medium text-[15px]">${item.name}</div><div class="text-pink-600 font-bold text-[15px]">${formatPrice(item.price)}</div></div><div class="flex items-center gap-2"><button data-idx="${idx}" data-act="dec" class="w-11 h-11 rounded-xl bg-white border text-[20px] font-medium active:scale-90">−</button><span class="w-8 text-center font-bold">${item.qty}</span><button data-idx="${idx}" data-act="inc" class="w-11 h-11 rounded-xl text-white text-[20px] font-medium active:scale-90" style="background:linear-gradient(135deg,#d81b60,#ff6b9d)">+</button></div>`; wrap.appendChild(div); }); wrap.querySelectorAll('button').forEach(b=>{ b.onclick=()=>{ const idx=+b.dataset.idx; const act=b.dataset.act; if(act==='inc') state.cart[idx].qty++; else{ state.cart[idx].qty--; if(state.cart[idx].qty<=0) state.cart.splice(idx,1); } updateCartUI(); }; }); }
+function openCart(){ $('cart-sheet').classList.remove('hidden'); setTimeout(()=>$('cart-panel').classList.remove('translate-y-full'),10); }
+function closeCart(){ $('cart-panel').classList.add('translate-y-full'); setTimeout(()=>$('cart-sheet').classList.add('hidden'),300); }
+function generateOrderId(){ const d=new Date(); const yymmdd=d.getFullYear().toString().slice(-2)+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0'); const prefix='NS'+yymmdd+'-'; const todayOrders=state.orders.filter(o=>o.id&&o.id.startsWith(prefix)); return prefix+String(todayOrders.length+1).padStart(3,'0'); }
+function checkout(){ if(state.cart.length===0) return; const id=generateOrderId(); const now=new Date(); const order={ id, table:state.table, items:state.cart.map(i=>({id:i.id||'',name:i.name,price:i.price,qty:i.qty})), total:state.cart.reduce((s,i)=>s+i.price*i.qty,0), time:now.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'}), timestamp:now.getTime(), date:now.toISOString().split('T')[0], status:'done' }; if(db){ db.ref('nhusay-pos/orders/'+id).set(order).catch(()=>{}); } state.orders.unshift(order); state.lastOrder=order; state.cart=[]; updateCartUI(); closeCart(); showSuccess(order); renderOrders(); renderRevenue(); }
+function showSuccess(order){ $('success-id').textContent=`Mã đơn: ${order.id} • ${order.table}`; $('success-total').textContent=formatPrice(order.total); $('success').classList.remove('hidden'); $('success').classList.add('flex'); }
+function hideSuccess(){ $('success').classList.add('hidden'); $('success').classList.remove('flex'); }
+function printBill(order){ const html=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${order.id}</title><style>@page{size:80mm auto;margin:2mm}*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Be Vietnam Pro',Arial,sans-serif;width:76mm;font-size:13px;color:#000;padding:2mm;line-height:1.35}.c{text-align:center}.b{font-weight:700}.lg{font-size:18px}.line{border-top:1px dashed #000;margin:5px 0}.r{display:flex;justify-content:space-between}.mt4{margin-top:4px}</style></head><body><div class="c b lg">TRÀ SỮA NHƯ SAY</div><div class="c" style="font-size:11px">Ngon như say, say như nghiện</div><div class="line"></div><div class="r"><span>HĐ: <span class="b">${order.id}</span></span><span>${order.time}</span></div><div>Bàn: <span class="b">${order.table}</span></div><div class="line"></div>${order.items.map(i=>`<div class="r"><span>${i.name} x${i.qty}</span><span>${formatPrice(i.price*i.qty)}</span></div>`).join('')}<div class="line"></div><div class="r b" style="font-size:16px"><span>TỔNG CỘNG</span><span>${formatPrice(order.total)}</span></div><div class="line"></div><div class="c mt4">Cảm ơn quý khách!</div><script>window.onload=()=>{setTimeout(()=>{window.print();window.close()},200)}<\/script></body></html>`; const w=window.open('','_blank'); if(w){ w.document.write(html); w.document.close(); } }
+function renderOrders(){ const list=$('orders-list'); list.innerHTML=''; const today=new Date().toISOString().split('T')[0]; const todayOrders=state.orders.filter(o=>o.date===today); $('orders-count').textContent=todayOrders.length+' đơn'; if(todayOrders.length===0){ list.innerHTML=`<div class="text-center py-12 text-gray-400">Chưa có đơn nào</div>`; return; } todayOrders.forEach(o=>{ const div=document.createElement('div'); div.className='bg-white rounded-2xl p-3.5 shadow-sm border border-gray-100 active:scale-[0.99]'; div.innerHTML=`<div class="flex justify-between items-start"><div><div class="font-bold text-[15px]">${o.id}</div><div class="text-[12px] text-gray-500 mt-0.5">${o.table} • ${o.time}</div></div><div class="text-right"><div class="font-bold text-pink-600">${formatPrice(o.total)}</div><button class="text-[11px] text-gray-500 mt-1 underline print-btn">In lại</button></div></div><div class="text-[12px] text-gray-600 mt-2 line-clamp-1">${o.items.map(i=>i.name+' x'+i.qty).join(' • ')}</div>`; div.querySelector('.print-btn').onclick=(e)=>{ e.stopPropagation(); printBill(o); }; list.appendChild(div); }); }
+function renderRevenue(){ const today=new Date().toISOString().split('T')[0]; const todayOrders=state.orders.filter(o=>o.date===today); const total=todayOrders.reduce((s,o)=>s+o.total,0); $('rev-total').textContent=formatPrice(total); $('rev-count').textContent=todayOrders.length; const top={}; todayOrders.forEach(o=>o.items.forEach(i=>{ top[i.name]=(top[i.name]||0)+i.qty; })); const sorted=Object.entries(top).sort((a,b)=>b[1]-a[1]).slice(0,5); $('rev-top').innerHTML=sorted.length?sorted.map(([n,q])=>`<div class="flex justify-between"><span>${n}</span><span class="font-semibold">${q}</span></div>`).join(''):'<div class="text-gray-400">Chưa có dữ liệu</div>'; }
+function renderMenuList(){ const list=$('menu-list'); list.innerHTML=''; state.products.forEach(p=>{ const div=document.createElement('div'); div.className='bg-white rounded-2xl p-3 shadow-sm border flex items-center gap-3'; div.innerHTML=`<div class="flex-1"><div class="font-medium text-[14px]">${p.name}</div><div class="text-[12px] text-gray-500">${p.category}</div></div><input type="number" value="${p.price}" class="w-24 h-10 px-2 rounded-xl bg-gray-100 text-right text-[15px] outline-none focus:ring-2 focus:ring-pink-500" data-id="${p.id}"><label class="flex items-center gap-1 text-[12px]"><input type="checkbox" ${p.active!==false?'checked':''} data-active="${p.id}"> Hiện</label>`; const inp=div.querySelector('input[type=number]'); inp.onchange=()=>{ p.price=parseInt(inp.value)||0; if(db) db.ref('nhusay-pos/menu/'+p.id+'/price').set(p.price); renderProducts(); }; div.querySelector('input[type=checkbox]').onchange=(e)=>{ p.active=e.target.checked; if(db) db.ref('nhusay-pos/menu/'+p.id+'/active').set(p.active); updateCategories(); renderProducts(); }; list.appendChild(div); }); }
+function switchTab(tab){ state.currentTab=tab; document.querySelectorAll('[id^=tab-]').forEach(s=>s.classList.add('hidden')); $('tab-'+tab).classList.remove('hidden'); document.querySelectorAll('.tab-btn').forEach(b=>{ const active=b.dataset.tab===tab; b.classList.toggle('text-pink-600',active); b.classList.toggle('text-gray-400',!active); }); }
+function bindEvents(){ $('search').oninput=(e)=>{ state.search=e.target.value; renderProducts(); }; $('cart-bar-inner').onclick=openCart; $('btn-checkout').onclick=(e)=>{ e.stopPropagation(); openCart(); }; $('cart-close').onclick=closeCart; $('cart-backdrop').onclick=closeCart; $('cart-checkout').onclick=checkout; $('success-done').onclick=hideSuccess; $('success-print').onclick=()=>{ if(state.lastOrder) printBill(state.lastOrder); hideSuccess(); }; document.querySelectorAll('.tab-btn').forEach(b=>b.onclick=()=>switchTab(b.dataset.tab)); $('btn-add-product').onclick=()=>{ const name=prompt('Tên món:'); if(!name) return; const price=parseInt(prompt('Giá (vnđ):')||'0'); if(!price) return; const cat=prompt('Danh mục:','Trà Sữa')||'Khác'; const id='p'+Date.now(); const p={id,name,price,category:cat,active:true}; state.products.push(p); if(db) db.ref('nhusay-pos/menu/'+id).set(p); updateCategories(); renderProducts(); renderMenuList(); }; }
+$('login-form').onsubmit=(e)=>{ e.preventDefault(); const pw=$('password').value.trim(); if(pw==='260426'){ $('login').classList.add('hidden'); $('app').classList.remove('hidden'); init(); } else { $('login-error').textContent='Mật khẩu không đúng'; $('password').value=''; $('password').focus(); } };
+window.addEventListener('load',()=>setTimeout(()=>$('password').focus(),300));
+let lastTouch=0; document.addEventListener('touchend',e=>{ const now=Date.now(); if(now-lastTouch<=300) e.preventDefault(); lastTouch=now; },{passive:false});
 </script>
 </body>
 </html>
