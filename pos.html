@@ -461,8 +461,17 @@ function changeQty(i,d){ const cart=state.carts[state.selectedTable]||[]; cart[i
 function checkout(){
   const cart = state.carts[state.selectedTable]||[]; if(!cart.length) return;
   const total = cart.reduce((s,i)=>s+i.price*i.qty,0);
-  const id = 'NS'+Date.now().toString().slice(-6);
-  const order = { id, table:state.selectedTable, items:cart.map(cleanCartItem), total, time:new Date().toISOString(), user:currentUser.name, status:'done' };
+  const now = new Date();
+  const y = now.getFullYear().toString().slice(-2);
+  const m = String(now.getMonth()+1).padStart(2,'0');
+  const d = String(now.getDate()).padStart(2,'0');
+  const dateStr = y + m + d;
+  const prefix = 'NS' + dateStr + '-';
+  // đếm đơn hôm nay để reset số thứ tự
+  const todayCount = Object.values(state.orders || {}).filter(o => o.id && o.id.startsWith(prefix)).length;
+  const seq = String(todayCount + 1).padStart(3, '0');
+  const id = prefix + seq;
+  const order = { id, table:state.selectedTable, items:cart.map(cleanCartItem), total, time:now.toISOString(), user:currentUser.name, status:'done' };
   const clean = JSON.parse(JSON.stringify(order));
   root.child('orders').child(id).set(clean).then(()=>{
     delete state.carts[state.selectedTable]; saveCarts(); renderCart();
