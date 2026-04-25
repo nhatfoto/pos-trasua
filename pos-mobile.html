@@ -59,6 +59,7 @@
         <h1 class="text-[20px] font-bold leading-none">Trà Sữa Như Say</h1>
         <p class="text-[12px] text-white/80">POS Mobile</p>
       </div>
+    </div>
     <div id="table-scroll" class="flex gap-2 overflow-x-auto no-scrollbar px-3 pb-3 pt-1"></div>
   </header>
 
@@ -474,7 +475,6 @@ function switchTab(tab){
 }
 
 function bindEvents(){
-  $('login-form').onsubmit = (e)=>{ e.preventDefault(); const pw=$('password').value; if(pw==='260426'){ $('login').classList.add('hidden'); $('app').classList.remove('hidden'); init(); } else { $('login-error').textContent='Mật khẩu không đúng'; $('password').value=''; $('password').focus(); } };
   $('search').oninput = (e)=>{ state.search=e.target.value; renderProducts(); };
   $('cart-bar-inner').onclick = openCart;
   $('btn-checkout').onclick = (e)=>{ e.stopPropagation(); openCart(); };
@@ -495,6 +495,24 @@ function bindEvents(){
     updateCategories(); renderProducts(); renderMenuList();
   };
 }
+
+// Login handler - phải chạy ngay khi load
+$('login-form').onsubmit = (e)=>{ 
+  e.preventDefault(); 
+  const pw=$('password').value.trim(); 
+  if(pw==='260426'){ 
+    $('login').classList.add('hidden'); 
+    $('app').classList.remove('hidden'); 
+    init(); 
+  } else { 
+    $('login-error').textContent='Mật khẩu không đúng'; 
+    $('password').value=''; 
+    $('password').focus(); 
+  } 
+};
+
+// Tự focus ô password trên mobile
+window.addEventListener('load', ()=> setTimeout(()=>$('password').focus(), 300));
 
 // Prevent double-tap zoom
 let lastTouch = 0;
