@@ -313,7 +313,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
   
   function unlock(){
     if(pwInput.value === PASS){
-      localStorage.setItem('ns_auth','1');
       lock.classList.add('hidden');
       app.classList.remove('hidden');
       document.getElementById('headerUser').textContent = currentUser.name;
@@ -327,14 +326,9 @@ document.addEventListener('DOMContentLoaded', ()=>{
   pwBtn.onclick = unlock;
   pwInput.onkeypress = e=>{ if(e.key==='Enter') unlock(); };
   
-  if(localStorage.getItem('ns_auth')==='1'){
-    lock.classList.add('hidden');
-    app.classList.remove('hidden');
-    document.getElementById('headerUser').textContent = currentUser.name;
-    initTabs(); bindUI(); loadData();
-  } else {
-    pwInput.focus();
-  }
+  // Luôn yêu cầu nhập mã mỗi lần vào
+  localStorage.removeItem('ns_auth');
+  pwInput.focus();
 });
 
 function initTabs(){
