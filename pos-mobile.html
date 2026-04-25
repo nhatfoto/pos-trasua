@@ -5,214 +5,280 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#d81b60">
-<title>Trà Sữa Như Say - POS</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>Trà Sữa Như Say - POS Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 <style>
-  *{ -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
-  html{ -webkit-text-size-adjust:100%; }
-  body{ font-family:'Be Vietnam Pro',system-ui,-apple-system,sans-serif; overscroll-behavior-y:contain; background:#fafafa; }
-  input, select, textarea, button{ font-size:18px; }
-  .no-scrollbar{ -ms-overflow-style:none; scrollbar-width:none; }
-  .no-scrollbar::-webkit-scrollbar{ display:none; }
-  .safe-bottom{ padding-bottom: max(0.5rem, env(safe-area-inset-bottom)); }
-  button{ min-height:44px; min-width:44px; transition: transform .15s ease; }
-  button:active{ transform: scale(0.96); }
-  .card-pop{ background:white; border-radius:20px; box-shadow:0 4px 20px rgba(216,27,96,0.08); border:1px solid rgba(0,0,0,0.04); }
-  .pill-active{ background:linear-gradient(135deg,#d81b60,#ff4081); color:white; box-shadow:0 4px 12px rgba(216,27,96,0.3); }
-  .nav-float{ backdrop-filter: blur(20px); background:rgba(255,255,255,0.9); box-shadow:0 -4px 24px rgba(0,0,0,0.08); border-radius:28px 28px 0 0; }
-  .product-img{ width:56px; height:56px; border-radius:50%; background:linear-gradient(135deg,#ffe4ee,#ffd6e7); display:flex; align-items:center; justify-content:center; font-size:28px; }
-  @keyframes pop { 0%{transform:scale(1)} 50%{transform:scale(1.1)} 100%{transform:scale(1)} }
-  .pop{ animation:pop .3s ease; }
-
-  *{ -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
-  html{ -webkit-text-size-adjust:100%; }
-  body{ font-family:'Be Vietnam Pro',system-ui,-apple-system,sans-serif; overscroll-behavior-y:contain; background:#f9fafb; }
-  input, select, textarea, button{ font-size:18px; }
-  .no-scrollbar{ -ms-overflow-style:none; scrollbar-width:none; }
-  .no-scrollbar::-webkit-scrollbar{ display:none; }
-  .safe-bottom{ padding-bottom: max(0.5rem, env(safe-area-inset-bottom)); }
-  button{ min-height:44px; min-width:44px; }
+  *{ -webkit-tap-highlight-color:transparent; touch-action:manipulation }
+  body{ font-family:'Be Vietnam Pro',system-ui; background:#fcf7fa; overscroll-behavior-y:contain }
+  .no-scrollbar::-webkit-scrollbar{display:none}
+  .no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}
+  .glass{ backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px) }
+  .shadow-soft{ box-shadow:0 8px 24px rgba(216,27,96,.08) }
+  .shadow-float{ box-shadow:0 12px 40px rgba(216,27,96,.18) }
+  button{ transition:all .15s }
+  button:active{ transform:scale(.96) }
+  .pill{ transition:all .2s }
+  .pill-active{ background:linear-gradient(135deg,#d81b60,#ff4081); color:white; box-shadow:0 4px 14px rgba(216,27,96,.35) }
+  @keyframes slideUp{ from{transform:translateY(100%)} to{transform:translateY(0)} }
+  .animate-slideUp{ animation:slideUp .3s cubic-bezier(.2,.8,.2,1) }
 </style>
 </head>
-<body class="bg-gray-50 text-gray-900 select-none">
+<body class="text-[15px] text-zinc-900 select-none">
 
-<div id="login" class="fixed inset-0 z-[200] flex items-center justify-center p-6" style="background:linear-gradient(135deg,#d81b60 0%,#ff6b9d 100%)">
-  <div class="w-full max-w-[340px] bg-white rounded-[28px] shadow-2xl p-8 text-center">
-    <div class="w-20 h-20 mx-auto rounded-2xl flex items-center justify-center mb-4 shadow-lg" style="background:linear-gradient(135deg,#d81b60,#ff6b9d)">
-      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M8 7V5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M7 7h10l1 9a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2l1-9z"/><path d="M10 11v4M14 11v4"/></svg>
+<!-- LOGIN -->
+<div id="login" class="fixed inset-0 z-[100] flex items-center justify-center p-6" style="background:radial-gradient(1200px 600px at 50% -10%,#ff7ab3 0%,#d81b60 45%,#a30f4a 100%)">
+  <div class="w-full max-w-[360px]">
+    <div class="text-center mb-8">
+      <div class="w-24 h-24 mx-auto rounded-[28px] bg-white/15 glass flex items-center justify-center shadow-float mb-4">
+        <span class="text-[44px]">🧋</span>
+      </div>
+      <h1 class="text-[32px] font-extrabold text-white tracking-tight">Như Say</h1>
+      <p class="text-white/80 mt-1">POS bán hàng • Nhanh • Đẹp</p>
     </div>
-    <h1 class="text-[26px] font-bold leading-tight">Trà Sữa Như Say</h1>
-    <p class="text-gray-500 mt-1 mb-6">Hệ thống bán hàng</p>
-    <form id="login-form" class="space-y-4">
-      <input id="password" type="password" inputmode="numeric" pattern="[0-9]*" placeholder="Nhập mật khẩu" class="w-full h-[56px] px-4 rounded-2xl bg-gray-100 text-center tracking-[0.3em] text-[18px] font-medium outline-none focus:ring-2 focus:ring-pink-500" autocomplete="off">
-      <button type="submit" class="w-full h-[56px] rounded-2xl text-white font-bold text-[17px] active:scale-[0.98] transition shadow-lg" style="background:linear-gradient(135deg,#d81b60,#ff6b9d)">Đăng nhập</button>
-      <p id="login-error" class="text-red-500 text-[14px] h-5"></p>
-    </form>
+    <div class="bg-white rounded-[32px] p-7 shadow-float">
+      <form id="login-form" class="space-y-4">
+        <div>
+          <label class="text-[13px] text-zinc-500 font-medium">Mật khẩu</label>
+          <input id="password" type="password" inputmode="numeric" placeholder="••••••" class="mt-1.5 w-full h-[56px] rounded-2xl bg-zinc-100 px-5 text-center text-[22px] tracking-[0.4em] font-semibold outline-none focus:ring-4 focus:ring-pink-500/20 focus:bg-white">
+        </div>
+        <button class="w-full h-[54px] rounded-2xl text-white font-bold bg-gradient-to-r from-[#d81b60] to-[#ff4081] shadow-[0_8px_20px_rgba(216,27,96,.35)]">Mở khóa</button>
+        <p id="login-error" class="text-red-500 text-[13px] text-center h-5"></p>
+        <p class="text-center text-[12px] text-zinc-400">Hotline: 0347.047.141</p>
+      </form>
+    </div>
   </div>
 </div>
 
-<div id="app" class="hidden h-[100dvh] flex flex-col max-w-[480px] mx-auto bg-gray-50 relative">
-  <header class="shrink-0 text-white relative z-30 overflow-hidden" style="background:linear-gradient(135deg,#d81b60 0%,#e91e63 50%,#ff4081 100%); padding-top:env(safe-area-inset-top)"><div class="absolute inset-0 opacity-10" style="background-image:radial-gradient(circle at 20% 30%, white 1px, transparent 1px), radial-gradient(circle at 80% 70%, white 1px, transparent 1px); background-size: 40px 40px;"></div>
-    <div class="flex items-center gap-3 px-4 pt-3 pb-2 relative z-10">
-      <div class="w-10 h-10 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M8 7V5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M7 7h10l1 9a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2l1-9z"/></svg>
-      </div>
-      <div>
-        <h1 class="text-[20px] font-bold leading-none">Trà Sữa Như Say</h1>
-        <p class="text-[12px] text-white/90 flex items-center gap-1.5">POS Mobile <span id="sync-dot" class="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span></p>
+<!-- APP -->
+<div id="app" class="hidden min-h-[100dvh] max-w-[480px] mx-auto relative flex flex-col">
+  <!-- Header -->
+  <header class="sticky top-0 z-30">
+    <div class="relative overflow-hidden" style="background:linear-gradient(135deg,#d81b60 0%,#e91e63 50%,#ff4081 100%)">
+      <div class="absolute inset-0 opacity-[0.08]" style="background-image:url('data:image/svg+xml,<svg width=%2240%22 height=%2240%22 xmlns=%22http://www.w3.org/2000/svg%22><circle cx=%222%22 cy=%222%22 r=%221%22 fill=%22white%22/></svg>')"></div>
+      <div class="pt-[max(12px,env(safe-area-inset-top))] px-4 pb-3 text-white">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-white/20 glass flex items-center justify-center text-[22px]">🧋</div>
+            <div>
+              <div class="font-extrabold text-[18px] leading-none">Trà Sữa Như Say</div>
+              <div class="flex items-center gap-1.5 mt-0.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" id="sync-dot"></span>
+                <span class="text-[11px] opacity-90">Đang đồng bộ</span>
+              </div>
+            </div>
+          </div>
+          <div class="text-right">
+            <div class="text-[11px] opacity-80">Hôm nay</div>
+            <div id="header-date" class="text-[13px] font-semibold">--/--</div>
+          </div>
+        </div>
+        <!-- Tables -->
+        <div id="table-scroll" class="flex gap-2 overflow-x-auto no-scrollbar mt-3 -mx-1 px-1 pb-1"></div>
       </div>
     </div>
-    <div id="table-scroll" class="flex gap-2 overflow-x-auto no-scrollbar px-3 pb-3 pt-1"></div>
   </header>
 
-  <div class="bg-white sticky top-0 z-20 border-b border-gray-100">
-    <div class="p-3 pb-2">
+  <!-- Search + Categories -->
+  <div class="sticky top-[104px] z-20 bg-[#fcf7fa]/80 glass border-b border-pink-100/60">
+    <div class="px-3 pt-3">
       <div class="relative">
-        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-        <input id="search" type="search" placeholder="Tìm trà sữa, topping..." class="w-full h-11 pl-10 pr-4 rounded-xl bg-gray-100 text-[16px] outline-none focus:ring-2 focus:ring-pink-500 focus:bg-white transition" />
+        <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" d="M21 21l-4.35-4.35M10 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16z"/></svg>
+        <input id="search" type="search" placeholder="Tìm món, topping..." class="w-full h-[46px] pl-11 pr-4 rounded-2xl bg-white shadow-soft outline-none text-[15px] placeholder:text-zinc-400 focus:ring-4 focus:ring-pink-500/15">
       </div>
     </div>
-    <div id="category-scroll" class="flex gap-2 overflow-x-auto no-scrollbar px-3 pb-3"></div>
+    <div id="category-scroll" class="flex gap-2 overflow-x-auto no-scrollbar px-3 py-3"></div>
   </div>
 
-  <main class="flex-1 overflow-y-auto">
-    <section id="tab-ban-hang" class="p-3 pb-[180px]"><div id="product-grid" class="grid grid-cols-2 gap-3"></div></section>
-    <section id="tab-don" class="hidden p-3 pb-[120px]"><div class="flex items-center justify-between mb-3"><h2 class="text-lg font-bold">Đơn hàng hôm nay</h2><span id="orders-count" class="text-sm text-gray-500"></span></div><div id="orders-list" class="space-y-2"></div></section>
-    <section id="tab-menu" class="hidden p-3 pb-[120px]"><div class="flex items-center justify-between mb-3"><h2 class="text-lg font-bold">Quản lý Menu</h2><button id="btn-add-product" class="h-9 px-3 rounded-xl text-white text-sm font-medium" style="background:linear-gradient(135deg,#d81b60,#ff6b9d)">+ Thêm món</button></div><div id="menu-list" class="space-y-2"></div></section>
-    <section id="tab-doanh-thu" class="hidden p-3 pb-[120px]"><h2 class="text-lg font-bold mb-3">Doanh thu hôm nay</h2><div class="grid grid-cols-2 gap-3 mb-4"><div class="bg-white rounded-2xl p-4 shadow-sm"><div class="text-xs text-gray-500">Tổng bán</div><div id="rev-total" class="text-2xl font-bold text-pink-600 mt-1">0đ</div></div><div class="bg-white rounded-2xl p-4 shadow-sm"><div class="text-xs text-gray-500">Số đơn</div><div id="rev-count" class="text-2xl font-bold mt-1">0</div></div></div><div class="bg-white rounded-2xl p-4 shadow-sm"><div class="text-sm font-semibold mb-2">Món bán chạy</div><div id="rev-top" class="space-y-1.5 text-sm"></div></div></section>
-    <section id="tab-cai-dat" class="hidden p-3 pb-[120px]"><h2 class="text-lg font-bold mb-3">Cài đặt</h2><div class="bg-white rounded-2xl p-4 shadow-sm"><div class="font-semibold">Trà Sữa Như Say</div><div class="text-sm text-gray-500 mt-1">Đồng bộ với bản PC qua Firebase</div></div></section>
+  <main class="flex-1">
+    <!-- BÁN HÀNG -->
+    <section id="tab-ban-hang" class="px-3 pt-3 pb-[200px]">
+      <div id="product-grid" class="grid grid-cols-2 gap-3"></div>
+      <div id="empty-products" class="hidden text-center py-20">
+        <div class="text-5xl mb-3">🥤</div>
+        <p class="text-zinc-500">Chưa có món trong danh mục này</p>
+      </div>
+    </section>
+
+    <!-- ĐƠN -->
+    <section id="tab-don" class="hidden px-3 pt-4 pb-[120px]">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-[20px] font-bold">Đơn hôm nay</h2>
+        <span id="orders-count" class="px-2.5 py-1 rounded-full bg-zinc-900 text-white text-[12px] font-semibold">0</span>
+      </div>
+      <div id="orders-list" class="space-y-2.5"></div>
+    </section>
+
+    <!-- MENU -->
+    <section id="tab-menu" class="hidden px-3 pt-4 pb-[120px]">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-[20px] font-bold">Menu</h2>
+        <button id="btn-add-product" class="h-9 px-3.5 rounded-xl bg-zinc-900 text-white text-[13px] font-semibold">+ Thêm món</button>
+      </div>
+      <div id="menu-list" class="space-y-2.5"></div>
+    </section>
+
+    <!-- DOANH THU -->
+    <section id="tab-doanh-thu" class="hidden px-3 pt-4 pb-[120px]">
+      <div class="grid grid-cols-2 gap-3">
+        <div class="bg-white rounded-[24px] p-4 shadow-soft">
+          <div class="text-[12px] text-zinc-500">Doanh thu</div>
+          <div id="rev-total" class="text-[26px] font-extrabold text-[#d81b60] mt-1">0đ</div>
+          <div class="text-[11px] text-zinc-400 mt-1">Hôm nay</div>
+        </div>
+        <div class="bg-white rounded-[24px] p-4 shadow-soft">
+          <div class="text-[12px] text-zinc-500">Đơn hàng</div>
+          <div id="rev-count" class="text-[26px] font-extrabold mt-1">0</div>
+          <div class="text-[11px] text-zinc-400 mt-1">Đã hoàn tất</div>
+        </div>
+      </div>
+      <div class="bg-white rounded-[24px] p-4 shadow-soft mt-3">
+        <div class="font-semibold mb-2">Top bán chạy</div>
+        <div id="rev-top" class="divide-y"></div>
+      </div>
+    </section>
+
+    <!-- CÀI ĐẶT -->
+    <section id="tab-cai-dat" class="hidden px-3 pt-4 pb-[120px]">
+      <div class="bg-white rounded-[24px] p-5 shadow-soft">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-2xl bg-pink-50 flex items-center justify-center text-[24px]">🧋</div>
+          <div>
+            <div class="font-bold">Trà Sữa Như Say</div>
+            <div class="text-[13px] text-zinc-500">0347.047.141 • Đồng bộ Firebase</div>
+          </div>
+        </div>
+      </div>
+    </section>
   </main>
 
-  <div id="cart-bar" class="fixed left-0 right-0 z-30 max-w-[480px] mx-auto" style="bottom:88px; display:none"><div class="mx-3 mb-2"><div id="cart-bar-inner" class="relative overflow-hidden bg-white rounded-[24px] p-3.5 flex items-center justify-between active:scale-[0.98] transition shadow-[0_8px_32px_rgba(216,27,96,0.2)] border border-pink-100"><div class="absolute inset-0 opacity-5" style="background:linear-gradient(135deg,#d81b60,transparent)"></div><div class="flex items-center gap-3"><div class="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold shadow-md relative" style="background:linear-gradient(135deg,#d81b60,#ff6b9d)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M9 8h-3l4-4 4 4h-3v8h-2z"/><circle cx="8.5" cy="19.5" r="1.5"/><circle cx="17.5" cy="19.5" r="1.5"/></svg><span id="cart-count" class="absolute -top-1.5 -right-1.5 bg-yellow-400 text-[11px] text-gray-900 font-bold w-5 h-5 rounded-full flex items-center justify-center">0</span></div><div><div class="text-[12px] text-gray-500 leading-none">Giỏ hàng</div><div id="cart-total" class="text-[18px] font-bold text-pink-600 leading-tight">0đ</div></div></div><button id="btn-checkout" class="h-12 px-6 rounded-xl text-white font-bold text-[15px] shadow-md active:scale-95" style="background:linear-gradient(135deg,#d81b60,#ff6b9d)">Thanh toán</button></div></div></div>
+  <!-- Cart Bar -->
+  <div id="cart-bar" class="fixed left-0 right-0 z-30 max-w-[480px] mx-auto" style="bottom:92px; display:none">
+    <div class="mx-3">
+      <div id="cart-bar-inner" class="glass bg-white/90 rounded-[24px] p-3 flex items-center gap-3 shadow-float border border-white">
+        <div class="relative">
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#d81b60] to-[#ff4081] flex items-center justify-center text-white shadow-lg">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 8H6l3-3 3 3H9v8H7z"/><circle cx="8.5" cy="19" r="1.5"/><circle cx="17.5" cy="19" r="1.5"/></svg>
+          </div>
+          <span id="cart-count" class="absolute -top-1 -right-1 min-w-[20px] h-5 px-1 rounded-full bg-zinc-900 text-white text-[11px] font-bold grid place-items-center">0</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="text-[12px] text-zinc-500 leading-none">Tạm tính • <span id="cart-table-name" class="text-zinc-900 font-medium">Mang về</span></div>
+          <div id="cart-total" class="text-[20px] font-extrabold leading-tight text-[#d81b60]">0đ</div>
+        </div>
+        <button id="btn-checkout" class="h-[48px] px-5 rounded-2xl bg-zinc-900 text-white font-bold shadow-lg">Thanh toán</button>
+      </div>
+    </div>
+  </div>
 
-  <nav class="fixed bottom-0 left-0 right-0 z-30 nav-float max-w-[480px] mx-auto safe-bottom">
-    <div class="grid grid-cols-5 h-[76px] px-2">
-      <button data-tab="ban-hang" class="tab-btn flex flex-col items-center justify-center gap-1 text-[11px] font-medium text-pink-600"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg><span>Bán hàng</span></button>
-      <button data-tab="don" class="tab-btn flex flex-col items-center justify-center gap-1 text-[11px] font-medium text-gray-400"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg><span>Đơn</span></button>
-      <button data-tab="menu" class="tab-btn flex flex-col items-center justify-center gap-1 text-[11px] font-medium text-gray-400"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg><span>Menu</span></button>
-      <button data-tab="doanh-thu" class="tab-btn flex flex-col items-center justify-center gap-1 text-[11px] font-medium text-gray-400"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg><span>Doanh thu</span></button>
-      <button data-tab="cai-dat" class="tab-btn flex flex-col items-center justify-center gap-1 text-[11px] font-medium text-gray-400"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 001.82.33h.01a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51h.01a1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82v.01a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg><span>Cài đặt</span></button>
+  <!-- Bottom Nav -->
+  <nav class="fixed bottom-0 inset-x-0 z-30 max-w-[480px] mx-auto">
+    <div class="mx-3 mb-[max(8px,env(safe-area-inset-bottom))] glass bg-white/85 rounded-[28px] shadow-float border border-white">
+      <div class="grid grid-cols-5 h-[72px]">
+        <button data-tab="ban-hang" class="tab-btn flex flex-col items-center justify-center gap-1 text-pink-600">
+          <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3l7 7h-2v9H7v-9H5l7-7z"/></svg>
+          <span class="text-[11px] font-semibold">Bán</span>
+        </button>
+        <button data-tab="don" class="tab-btn flex flex-col items-center justify-center gap-1 text-zinc-400">
+          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2M12 12h4M12 16h4M9 12h.01M9 16h.01"/></svg>
+          <span class="text-[11px]">Đơn</span>
+        </button>
+        <button data-tab="menu" class="tab-btn flex flex-col items-center justify-center gap-1 text-zinc-400">
+          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+          <span class="text-[11px]">Menu</span>
+        </button>
+        <button data-tab="doanh-thu" class="tab-btn flex flex-col items-center justify-center gap-1 text-zinc-400">
+          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 3v18h18M7 14l3-3 4 4 5-6"/></svg>
+          <span class="text-[11px]">Doanh thu</span>
+        </button>
+        <button data-tab="cai-dat" class="tab-btn flex flex-col items-center justify-center gap-1 text-zinc-400">
+          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 0 0 0-1.82-.33 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 0 0 0 .33-1.82 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 0 0 0 4.6 9a1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 0 0 0 9 4.6V4a2 2 0 1 1 4 0v.09c0 .66.39 1.26 1 1.51.6.25 1.3.13 1.77-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06c-.46.47-.58 1.17-.33 1.77.25.61.85 1 1.51 1H20a2 2 0 1 1 0 4h-.09c-.66 0-1.26.39-1.51 1z"/></svg>
+          <span class="text-[11px]">Cài đặt</span>
+        </button>
+      </div>
     </div>
   </nav>
 </div>
 
-<div id="cart-sheet" class="fixed inset-0 z-50 hidden"><div id="cart-backdrop" class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div><div id="cart-panel" class="absolute bottom-0 left-0 right-0 bg-white rounded-t-[28px] max-h-[85vh] flex flex-col translate-y-full transition-transform duration-300 max-w-[480px] mx-auto shadow-2xl"><div class="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mt-3 shrink-0"></div><div class="flex items-center justify-between px-4 py-3 border-b shrink-0"><h3 class="text-[18px] font-bold">Giỏ hàng • <span id="cart-table-name" class="text-pink-600">Mang về</span></h3><button id="cart-close" class="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center active:scale-90">✕</button></div><div id="cart-items" class="flex-1 overflow-y-auto p-3 space-y-2"></div><div class="p-4 border-t bg-gray-50 safe-bottom shrink-0"><div class="flex justify-between items-center mb-3"><span class="text-[15px] font-medium text-gray-600">Tổng cộng</span><span id="cart-sheet-total" class="text-[24px] font-bold text-pink-600">0đ</span></div><button id="cart-checkout" class="w-full h-[52px] rounded-2xl text-white font-bold text-[17px] shadow-lg active:scale-[0.98]" style="background:linear-gradient(135deg,#d81b60,#ff6b9d)">Xác nhận thanh toán</button></div></div></div>
+<!-- Cart Sheet -->
+<div id="cart-sheet" class="fixed inset-0 z-50 hidden">
+  <div id="cart-backdrop" class="absolute inset-0 bg-black/50"></div>
+  <div id="cart-panel" class="absolute inset-x-0 bottom-0 max-w-[480px] mx-auto bg-white rounded-t-[32px] max-h-[88vh] flex flex-col translate-y-full">
+    <div class="w-12 h-1.5 bg-zinc-300 rounded-full mx-auto mt-3"></div>
+    <div class="px-5 py-4 flex items-center justify-between">
+      <div>
+        <div class="text-[11px] uppercase tracking-wide text-zinc-500 font-semibold">Giỏ hàng</div>
+        <div class="text-[20px] font-extrabold -mt-0.5"><span id="cart-sheet-table">Mang về</span></div>
+      </div>
+      <button id="cart-close" class="w-9 h-9 rounded-full bg-zinc-100 grid place-items-center">✕</button>
+    </div>
+    <div id="cart-items" class="flex-1 overflow-y-auto px-4 pb-3 space-y-2.5"></div>
+    <div class="p-4 border-t bg-zinc-50 rounded-b-[32px]">
+      <div class="flex items-center justify-between mb-3">
+        <span class="text-zinc-600">Tổng cộng</span>
+        <span id="cart-sheet-total" class="text-[28px] font-extrabold text-[#d81b60]">0đ</span>
+      </div>
+      <button id="cart-checkout" class="w-full h-[54px] rounded-2xl bg-zinc-900 text-white font-bold text-[16px]">Xác nhận thanh toán</button>
+    </div>
+  </div>
+</div>
 
-<div id="success" class="fixed inset-0 z-[60] hidden items-center justify-center p-6 bg-black/60 backdrop-blur-sm"><div class="bg-white rounded-[28px] p-7 w-full max-w-[320px] text-center shadow-2xl"><div class="w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-4" style="background:linear-gradient(135deg,#d81b60,#ff6b9d)"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div><h3 class="text-[22px] font-bold">Thành công!</h3><p id="success-id" class="text-gray-500 mt-1 text-[14px]"></p><p id="success-total" class="text-[28px] font-bold text-pink-600 mt-2"></p><div class="grid grid-cols-2 gap-3 mt-6"><button id="success-done" class="h-12 rounded-xl bg-gray-100 font-semibold text-[15px] active:scale-95">Xong</button><button id="success-print" class="h-12 rounded-xl text-white font-semibold text-[15px] shadow-md active:scale-95" style="background:linear-gradient(135deg,#d81b60,#ff6b9d)">In bill</button></div></div></div>
+<!-- Success -->
+<div id="success" class="fixed inset-0 z-[60] hidden place-items-center p-6 bg-black/60">
+  <div class="bg-white rounded-[32px] p-7 w-full max-w-[340px] text-center shadow-2xl animate-slideUp">
+    <div class="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-[#d81b60] to-[#ff4081] grid place-items-center mb-4 shadow-lg">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
+    </div>
+    <h3 class="text-[22px] font-extrabold">Thanh toán thành công</h3>
+    <p id="success-id" class="text-zinc-500 mt-1 text-[13px]"></p>
+    <p id="success-total" class="text-[32px] font-black text-[#d81b60] mt-2"></p>
+    <div class="grid grid-cols-2 gap-2.5 mt-6">
+      <button id="success-done" class="h-12 rounded-xl bg-zinc-100 font-semibold">Xong</button>
+      <button id="success-print" class="h-12 rounded-xl bg-zinc-900 text-white font-semibold">In bill</button>
+    </div>
+  </div>
+</div>
 
 <script>
-const $ = id => document.getElementById(id);
-const state = { table:'Mang về', cart:[], products:[], categories:['Tất cả'], orders:[], search:'', activeCategory:'Tất cả', tables:['Mang về','Bàn 1','Bàn 2','Bàn 3','Bàn 4','Bàn 5','Bàn 6','Bàn 7','Bàn 8','Bàn 9','Bàn 10'], currentTab:'ban-hang', lastOrder:null };
+const $=id=>document.getElementById(id);
+const state={table:'Mang về',cart:[],products:[],categories:['Tất cả'],orders:[],search:'',activeCategory:'Tất cả',tables:['Mang về','Bàn 1','Bàn 2','Bàn 3','Bàn 4','Bàn 5','Bàn 6','Bàn 7','Bàn 8','Bàn 9','Bàn 10'],lastOrder:null};
+const SAMPLE_MENU=[{id:'ts01',name:'Trà Sữa Truyền Thống',price:25000,category:'Trà Sữa',active:true,icon:'🧋'},{id:'ts02',name:'Trà Sữa Thái Xanh',price:25000,category:'Trà Sữa',active:true,icon:'💚'},{id:'ts03',name:'Trà Sữa Khoai Môn',price:25000,category:'Trà Sữa',active:true,icon:'💜'},{id:'tt01',name:'Trà Đào Cam Sả',price:25000,category:'Trà Trái Cây',active:true,icon:'🍑'},{id:'tp01',name:'Trân Châu Đen',price:5000,category:'Topping',active:true,icon:'⚫'}];
+const firebaseConfig={apiKey:"AIzaSyABseQ0_Me77MUWnu8ezVtcfCAS4XlRBjs",authDomain:"trasua-nhusay-d6708.firebaseapp.com",databaseURL:"https://trasua-nhusay-d6708-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"trasua-nhusay-d6708",storageBucket:"trasua-nhusay-d6708.firebasestorage.app",messagingSenderId:"626489476647",appId:"1:626489476647:web:65d82a552ad1bdb5d9b002"};
+let db=null; try{firebase.initializeApp(firebaseConfig);db=firebase.database()}catch(e){}
+const fmt=n=>new Intl.NumberFormat('vi-VN').format(n)+'đ';
+const getLocalDate=()=>{const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
+$('header-date').textContent=new Date().toLocaleDateString('vi-VN',{day:'2-digit',month:'2-digit'});
 
-const SAMPLE_MENU = [
-  {id:'ts01', name:'Trà Sữa Truyền Thống', price:25000, category:'Trà Sữa', active:true},
-  {id:'ts02', name:'Trà Sữa Thái Xanh', price:28000, category:'Trà Sữa', active:true},
-  {id:'ts03', name:'Hồng Trà Sữa', price:27000, category:'Trà Sữa', active:true},
-  {id:'tt01', name:'Trà Đào Cam Sả', price:26000, category:'Trà Trái Cây', active:true},
-  {id:'tp01', name:'Trân Châu Đen', price:5000, category:'Topping', active:true},
-];
-
-const firebaseConfig = {
-  apiKey: "AIzaSyABseQ0_Me77MUWnu8ezVtcfCAS4XlRBjs",
-  authDomain: "trasua-nhusay-d6708.firebaseapp.com",
-  databaseURL: "https://trasua-nhusay-d6708-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "trasua-nhusay-d6708",
-  storageBucket: "trasua-nhusay-d6708.firebasestorage.app",
-  messagingSenderId: "626489476647",
-  appId: "1:626489476647:web:65d82a552ad1bdb5d9b002"
-};
-let db=null; try{ firebase.initializeApp(firebaseConfig); db=firebase.database(); }catch(e){}
-
-function formatPrice(n){ return new Intl.NumberFormat('vi-VN').format(n)+'đ'; }
-function getLocalDate(){ const d=new Date(); const y=d.getFullYear(); const m=String(d.getMonth()+1).padStart(2,'0'); const day=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${day}`; }
-function init(){ renderTables(); loadData(); bindEvents(); $('cart-table-name').textContent=state.table; }
-
+function init(){renderTables();loadData();bindEvents();$('cart-table-name').textContent=state.table;$('cart-sheet-table').textContent=state.table}
 function loadData(){
-  if(db){ $('sync-dot').className='w-1.5 h-1.5 bg-yellow-400 rounded-full animate-pulse'; }
-  
-  // MENU
-  db.ref('nhusay-pos/menu').on('value', snap=>{
-    const val=snap.val();
-    state.products = val?Object.entries(val).map(([k,v])=>({...v, id:v.id||k})):SAMPLE_MENU;
-    updateCategories(); renderProducts(); renderMenuList();
-  });
-  
-  // ORDERS - FIX GIỜ THẬT
-  db.ref('nhusay-pos/orders').limitToLast(200).on('value', snap=>{
-    const val=snap.val();
-    state.orders = val?Object.values(val).map(o=>{
-      // Nếu thiếu timestamp thì tạo từ giờ thật, KHÔNG gán 12h
-      if(!o.timestamp || isNaN(o.timestamp)){
-        o.timestamp = o.time ? new Date(o.date+'T'+o.time).getTime() : Date.now();
-      }
-      if(!o.date){ o.date = getLocalDate(); }
-      if(!o.time){ o.time = new Date(o.timestamp).toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit',hour12:false}); }
-      return o;
-    }).sort((a,b)=>b.timestamp-a.timestamp):[];
-    renderOrders(); renderRevenue();
-    $('sync-dot').className='w-1.5 h-1.5 bg-green-400 rounded-full';
-  });
-
-  // TABLES - LẤY TỪ PC, nếu chưa có thì tạo 10 bàn
-  db.ref('nhusay-pos/settings').on('value', snap=>{
-    const s = snap.val()||{};
-    const n = s.tables || 10;
-    state.tables = ['Mang về', ...Array.from({length:n},(_,i)=>`Bàn ${i+1}`)];
-    renderTables();
-  });
+  if(!db){state.products=SAMPLE_MENU;updateCategories();renderProducts();return}
+  $('sync-dot').className='w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse';
+  db.ref('nhusay-pos/menu').on('value',s=>{const v=s.val();state.products=v?Object.entries(v).map(([k,v])=>({...v,id:v.id||k,icon:v.icon||'🧋'})):SAMPLE_MENU;updateCategories();renderProducts();renderMenuList()});
+  db.ref('nhusay-pos/orders').limitToLast(200).on('value',s=>{const v=s.val();state.orders=v?Object.values(v).map(o=>{if(!o.timestamp||isNaN(o.timestamp))o.timestamp=o.time?new Date((o.date||getLocalDate())+'T'+o.time).getTime():Date.now();if(!o.date)o.date=getLocalDate();if(!o.time)o.time=new Date(o.timestamp).toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit',hour12:false});return o}).sort((a,b)=>b.timestamp-a.timestamp):[];renderOrders();renderRevenue();$('sync-dot').className='w-1.5 h-1.5 bg-emerald-400 rounded-full'});
+  db.ref('nhusay-pos/settings').on('value',s=>{const n=(s.val()||{}).tables||10;state.tables=['Mang về',...Array.from({length:n},(_,i)=>`Bàn ${i+1}`)];renderTables()});
 }
-
-function updateCategories(){ const cats=['Tất cả',...new Set(state.products.filter(p=>p.active!==false).map(p=>p.category))]; state.categories=cats; renderCategories(); }
-function renderTables(){ const wrap=$('table-scroll'); wrap.innerHTML=''; state.tables.forEach(t=>{ const btn=document.createElement('button'); const active=t===state.table; btn.className=`px-4 h-9 rounded-full text-[14px] font-medium whitespace-nowrap transition ${active?'bg-white text-pink-600 shadow-md':'bg-white/20 text-white backdrop-blur border border-white/30'}`; btn.textContent=t; btn.onclick=()=>{ state.table=t; $('cart-table-name').textContent=t; renderTables(); }; wrap.appendChild(btn); }); }
-function renderCategories(){ const wrap=$('category-scroll'); wrap.innerHTML=''; state.categories.forEach(c=>{ const btn=document.createElement('button'); const active=c===state.activeCategory; btn.className=`px-4 h-9 rounded-full text-[14px] font-medium whitespace-nowrap transition ${active?'pill-active':'bg-gray-100 text-gray-700'}`; btn.textContent=c; btn.onclick=()=>{ state.activeCategory=c; renderCategories(); renderProducts(); }; wrap.appendChild(btn); }); }
-function renderProducts(){ const grid=$('product-grid'); grid.innerHTML=''; const kw=state.search.toLowerCase(); const list=state.products.filter(p=>p.active!==false && (state.activeCategory==='Tất cả'||p.category===state.activeCategory) && (!kw||p.name.toLowerCase().includes(kw))); list.forEach(p=>{ const btn=document.createElement('button'); btn.className='group relative bg-white rounded-[24px] p-0 text-left active:scale-[0.97] transition-all duration-200 min-h-[140px] flex flex-col overflow-hidden shadow-[0_2px_12px_rgba(216,27,96,0.08)] hover:shadow-[0_8px_24px_rgba(216,27,96,0.15)] border border-pink-50'; btn.innerHTML=`<div class='absolute top-0 right-0 w-20 h-20 opacity-[0.03]' style='background:radial-gradient(circle,#d81b60,transparent)'></div><div class='p-3.5 pb-2'><div class='flex items-start gap-3'><div class='relative'><div class='w-[64px] h-[64px] rounded-[20px] flex items-center justify-center text-[32px] shadow-inner' style='background:linear-gradient(135deg,#fff0f5,#ffe4ee); box-shadow:inset 0 2px 8px rgba(216,27,96,0.1)'>🧋</div><div class='absolute -bottom-1 -right-1 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow-md'><div class='w-2 h-2 rounded-full' style='background:#d81b60'></div></div></div><div class='flex-1 min-w-0'><div class='text-[15px] font-bold leading-tight text-gray-900 group-active:text-pink-600 transition'>${p.name}</div><div class='inline-flex items-center gap-1 mt-1.5'><span class='text-[10px] px-2 py-0.5 rounded-full font-medium' style='background:#fff0f5; color:#d81b60'>${p.category}</span></div></div></div></div><div class='mt-auto px-3.5 pb-3.5 flex items-center justify-between'><div><div class='text-[11px] text-gray-400 -mb-1'>Giá</div><div class='text-[20px] font-black tracking-tight' style='color:#d81b60'>${formatPrice(p.price)}</div></div><div class='w-10 h-10 rounded-[14px] flex items-center justify-center text-white shadow-lg group-active:scale-110 transition-transform' style='background:linear-gradient(135deg,#d81b60,#ff4081); box-shadow:0 4px 12px rgba(216,27,96,0.3)'><svg width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.5'><path d='M12 5v14M5 12h14'/></svg></div></div>`; btn.onclick=()=>addToCart(p); grid.appendChild(btn); }); if(list.length===0){ grid.innerHTML=`<div class="col-span-2 text-center py-12 text-gray-400">Không tìm thấy món</div>`; } }
-function addToCart(p){ const i=state.cart.findIndex(x=>x.id===p.id); if(i>=0) state.cart[i].qty++; else state.cart.push({id:p.id,name:p.name,price:p.price,qty:1}); updateCartUI(); if(navigator.vibrate) navigator.vibrate(10); }
-function updateCartUI(){ const total=state.cart.reduce((s,i)=>s+i.price*i.qty,0); const count=state.cart.reduce((s,i)=>s+i.qty,0); $('cart-count').textContent=count; $('cart-total').textContent=formatPrice(total); $('cart-sheet-total').textContent=formatPrice(total); $('cart-bar').style.display=count>0?'block':'none'; renderCartItems(); }
-function renderCartItems(){ const wrap=$('cart-items'); wrap.innerHTML=''; if(state.cart.length===0){ wrap.innerHTML=`<div class="text-center py-16 text-gray-400">Chưa có món nào</div>`; return; } state.cart.forEach((item,idx)=>{ const div=document.createElement('div'); div.className='flex items-center gap-3 bg-gray-50 rounded-2xl p-3'; div.innerHTML=`<div class="flex-1"><div class="font-medium text-[15px]">${item.name}</div><div class="text-pink-600 font-bold text-[15px]">${formatPrice(item.price)}</div></div><div class="flex items-center gap-2"><button data-idx="${idx}" data-act="dec" class="w-11 h-11 rounded-xl bg-white border text-[20px] font-medium active:scale-90">−</button><span class="w-8 text-center font-bold">${item.qty}</span><button data-idx="${idx}" data-act="inc" class="w-11 h-11 rounded-xl text-white text-[20px] font-medium active:scale-90" style="background:linear-gradient(135deg,#d81b60,#ff6b9d)">+</button></div>`; wrap.appendChild(div); }); wrap.querySelectorAll('button').forEach(b=>{ b.onclick=()=>{ const idx=+b.dataset.idx; const act=b.dataset.act; if(act==='inc') state.cart[idx].qty++; else{ state.cart[idx].qty--; if(state.cart[idx].qty<=0) state.cart.splice(idx,1); } updateCartUI(); }; }); }
-function openCart(){ $('cart-sheet').classList.remove('hidden'); setTimeout(()=>$('cart-panel').classList.remove('translate-y-full'),10); }
-function closeCart(){ $('cart-panel').classList.add('translate-y-full'); setTimeout(()=>$('cart-sheet').classList.add('hidden'),300); }
-function generateOrderId(){ const d=new Date(); const yymmdd=d.getFullYear().toString().slice(-2)+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0'); const prefix='NS'+yymmdd+'-'; const todayOrders=state.orders.filter(o=>o.id&&o.id.startsWith(prefix)); return prefix+String(todayOrders.length+1).padStart(3,'0'); }
-function checkout(){
-  if(state.cart.length===0) return;
-  const id=generateOrderId();
-  const now=new Date();
-  // LƯU GIỜ THẬT VN
-  const order={
-    id,
-    table:state.table,
-    items:state.cart.map(i=>({id:i.id||'',name:i.name,price:i.price,qty:i.qty})),
-    total:state.cart.reduce((s,i)=>s+i.price*i.qty,0),
-    time:now.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit',hour12:false}), // "16:59"
-    timestamp:now.getTime(), // 1745582396000
-    date:getLocalDate(), // "2026-04-25" - GIỜ VN THẬT
-    status:'done'
-  };
-  if(db){ db.ref('nhusay-pos/orders/'+id).set(order); }
-  state.orders.unshift(order);
-  state.lastOrder=order;
-  state.cart=[];
-  updateCartUI();
-  closeCart();
-  showSuccess(order);
-  renderOrders();
-  renderRevenue();
-}
-function showSuccess(order){ $('success-id').textContent=`Mã đơn: ${order.id} • ${order.table}`; $('success-total').textContent=formatPrice(order.total); $('success').classList.remove('hidden'); $('success').classList.add('flex'); }
-function hideSuccess(){ $('success').classList.add('hidden'); $('success').classList.remove('flex'); }
-function printBill(order){ const html=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${order.id}</title><style>@page{size:80mm auto;margin:2mm}*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Be Vietnam Pro',Arial,sans-serif;width:76mm;font-size:13px;color:#000;padding:2mm;line-height:1.35}.c{text-align:center}.b{font-weight:700}.lg{font-size:18px}.line{border-top:1px dashed #000;margin:5px 0}.r{display:flex;justify-content:space-between}.mt4{margin-top:4px}</style></head><body><div class="c b lg">TRÀ SỮA NHƯ SAY</div><div class="c" style="font-size:11px">Trà sữa đậm vị, hương vị " Như Say " lòng bạn</div><div class="line"></div><div class="r"><span>HĐ: <span class="b">${order.id}</span></span><span>${order.time}</span></div><div>Bàn: <span class="b">${order.table}</span></div><div class="line"></div>${order.items.map(i=>`<div class="r"><span>${i.name} x${i.qty}</span><span>${formatPrice(i.price*i.qty)}</span></div>`).join('')}<div class="line"></div><div class="r b" style="font-size:16px"><span>TỔNG CỘNG</span><span>${formatPrice(order.total)}</span></div><div class="line"></div><div class="c mt4">Cảm ơn quý khách!</div><script>window.onload=()=>{setTimeout(()=>{window.print();window.close()},200)}<\/script></body></html>`; const w=window.open('','_blank'); if(w){ w.document.write(html); w.document.close(); } }
-function renderOrders(){ const list=$('orders-list'); list.innerHTML=''; const today=getLocalDate(); const todayOrders=state.orders.filter(o=>o.date===today); $('orders-count').textContent=todayOrders.length+' đơn'; if(todayOrders.length===0){ list.innerHTML=`<div class="text-center py-12 text-gray-400">Chưa có đơn nào</div>`; return; } todayOrders.forEach(o=>{ const div=document.createElement('div'); div.className='bg-white rounded-2xl p-3.5 shadow-sm border border-gray-100 active:scale-[0.99]'; div.innerHTML=`<div class="flex justify-between items-start"><div><div class="font-bold text-[15px]">${o.id}</div><div class="text-[12px] text-gray-500 mt-0.5">${o.table} • ${o.time}</div></div><div class="text-right"><div class="font-bold text-pink-600">${formatPrice(o.total)}</div><button class="text-[11px] text-gray-500 mt-1 underline print-btn">In lại</button></div></div><div class="text-[12px] text-gray-600 mt-2 line-clamp-1">${o.items.map(i=>i.name+' x'+i.qty).join(' • ')}</div>`; div.querySelector('.print-btn').onclick=(e)=>{ e.stopPropagation(); printBill(o); }; list.appendChild(div); }); }
-function renderRevenue(){ const today=getLocalDate(); const todayOrders=state.orders.filter(o=>o.date===today); const total=todayOrders.reduce((s,o)=>s+o.total,0); $('rev-total').textContent=formatPrice(total); $('rev-count').textContent=todayOrders.length; const top={}; todayOrders.forEach(o=>o.items.forEach(i=>{ top[i.name]=(top[i.name]||0)+i.qty; })); const sorted=Object.entries(top).sort((a,b)=>b[1]-a[1]).slice(0,5); $('rev-top').innerHTML=sorted.length?sorted.map(([n,q])=>`<div class="flex justify-between"><span>${n}</span><span class="font-semibold">${q}</span></div>`).join(''):'<div class="text-gray-400">Chưa có dữ liệu</div>'; }
-function renderMenuList(){ const list=$('menu-list'); list.innerHTML=''; state.products.forEach(p=>{ const div=document.createElement('div'); div.className='bg-white rounded-2xl p-3 shadow-sm border flex items-center gap-3'; div.innerHTML=`<div class="flex-1"><div class="font-medium text-[14px]">${p.name}</div><div class="text-[12px] text-gray-500">${p.category}</div></div><input type="number" value="${p.price}" class="w-24 h-10 px-2 rounded-xl bg-gray-100 text-right text-[15px] outline-none focus:ring-2 focus:ring-pink-500" data-id="${p.id}"><label class="flex items-center gap-1 text-[12px]"><input type="checkbox" ${p.active!==false?'checked':''} data-active="${p.id}"> Hiện</label>`; const inp=div.querySelector('input[type=number]'); inp.onchange=()=>{ p.price=parseInt(inp.value)||0; if(db) db.ref('nhusay-pos/menu/'+p.id+'/price').set(p.price); renderProducts(); }; div.querySelector('input[type=checkbox]').onchange=(e)=>{ p.active=e.target.checked; if(db) db.ref('nhusay-pos/menu/'+p.id+'/active').set(p.active); updateCategories(); renderProducts(); }; list.appendChild(div); }); }
-function switchTab(tab){ state.currentTab=tab; document.querySelectorAll('[id^=tab-]').forEach(s=>s.classList.add('hidden')); $('tab-'+tab).classList.remove('hidden'); document.querySelectorAll('.tab-btn').forEach(b=>{ const active=b.dataset.tab===tab; b.classList.toggle('text-pink-600',active); b.classList.toggle('text-gray-400',!active); if(active){ b.innerHTML = b.innerHTML.replace('<svg','<svg style="filter:drop-shadow(0 2px 4px rgba(216,27,96,0.3))"'); } }); }
-function bindEvents(){ $('search').oninput=(e)=>{ state.search=e.target.value; renderProducts(); }; $('cart-bar-inner').onclick=openCart; $('btn-checkout').onclick=(e)=>{ e.stopPropagation(); openCart(); }; $('cart-close').onclick=closeCart; $('cart-backdrop').onclick=closeCart; $('cart-checkout').onclick=checkout; $('success-done').onclick=hideSuccess; $('success-print').onclick=()=>{ if(state.lastOrder) printBill(state.lastOrder); hideSuccess(); }; document.querySelectorAll('.tab-btn').forEach(b=>b.onclick=()=>switchTab(b.dataset.tab)); $('btn-add-product').onclick=()=>{ const name=prompt('Tên món:'); if(!name) return; const price=parseInt(prompt('Giá (vnđ):')||'0'); if(!price) return; const cat=prompt('Danh mục:','Trà Sữa')||'Khác'; const id='p'+Date.now(); const p={id,name,price,category:cat,active:true}; state.products.push(p); if(db) db.ref('nhusay-pos/menu/'+id).set(p); updateCategories(); renderProducts(); renderMenuList(); }; }
-$('login-form').onsubmit=(e)=>{ e.preventDefault(); const pw=$('password').value.trim(); if(pw==='260426'){ $('login').classList.add('hidden'); $('app').classList.remove('hidden'); init(); } else { $('login-error').textContent='Mật khẩu không đúng'; $('password').value=''; $('password').focus(); } };
-window.addEventListener('load',()=>setTimeout(()=>$('password').focus(),300));
-let lastTouch=0; document.addEventListener('touchend',e=>{ const now=Date.now(); if(now-lastTouch<=300) e.preventDefault(); lastTouch=now; },{passive:false});
+function updateCategories(){state.categories=['Tất cả',...new Set(state.products.filter(p=>p.active!==false).map(p=>p.category))];renderCategories()}
+function renderTables(){const w=$('table-scroll');w.innerHTML='';state.tables.forEach(t=>{const b=document.createElement('button');const a=t===state.table;b.className=`pill px-3.5 h-8 rounded-full text-[13px] font-semibold whitespace-nowrap ${a?'pill-active':'bg-white/20 text-white hover:bg-white/30'}`;b.textContent=t;b.onclick=()=>{state.table=t;$('cart-table-name').textContent=t;$('cart-sheet-table').textContent=t;renderTables()};w.appendChild(b)})}
+function renderCategories(){const w=$('category-scroll');w.innerHTML='';state.categories.forEach(c=>{const b=document.createElement('button');const a=c===state.activeCategory;b.className=`pill px-4 h-[34px] rounded-full text-[13px] font-semibold whitespace-nowrap ${a?'pill-active':'bg-white text-zinc-700 shadow-soft'}`;b.textContent=c;b.onclick=()=>{state.activeCategory=c;renderCategories();renderProducts()};w.appendChild(b)})}
+function renderProducts(){const g=$('product-grid'),kw=state.search.toLowerCase();const list=state.products.filter(p=>p.active!==false&&(state.activeCategory==='Tất cả'||p.category===state.activeCategory)&&(!kw||p.name.toLowerCase().includes(kw)));g.innerHTML='';$('empty-products').classList.toggle('hidden',list.length>0);list.forEach(p=>{const card=document.createElement('button');card.className='group text-left bg-white rounded-[24px] p-3 shadow-soft border border-zinc-100 active:scale-[0.98]';card.innerHTML=`<div class="flex gap-3"><div class="w-[64px] h-[64px] rounded-2xl bg-gradient-to-br from-pink-50 to-rose-50 grid place-items-center text-[30px]">${p.icon||'🧋'}</div><div class="flex-1 min-w-0"><div class="font-bold leading-snug line-clamp-2 min-h-[40px]">${p.name}</div><div class="mt-1 flex items-center justify-between"><span class="text-[18px] font-extrabold text-[#d81b60]">${fmt(p.price)}</span><span class="w-8 h-8 rounded-xl bg-zinc-900 text-white grid place-items-center group-active:scale-110">+</span></div></div></div>`;card.onclick=()=>addToCart(p);g.appendChild(card)})}
+function addToCart(p){const i=state.cart.findIndex(x=>x.id===p.id);if(i>=0)state.cart[i].qty++;else state.cart.push({id:p.id,name:p.name,price:p.price,qty:1,icon:p.icon});updateCartUI();navigator.vibrate&&navigator.vibrate(8)}
+function updateCartUI(){const total=state.cart.reduce((s,i)=>s+i.price*i.qty,0),count=state.cart.reduce((s,i)=>s+i.qty,0);$('cart-count').textContent=count;$('cart-total').textContent=fmt(total);$('cart-sheet-total').textContent=fmt(total);$('cart-bar').style.display=count?'block':'none';renderCartItems()}
+function renderCartItems(){const w=$('cart-items');w.innerHTML='';if(!state.cart.length){w.innerHTML=`<div class="text-center py-16 text-zinc-400">Chưa có món</div>`;return}state.cart.forEach((it,i)=>{const row=document.createElement('div');row.className='flex items-center gap-3 bg-zinc-50 rounded-2xl p-3';row.innerHTML=`<div class="w-10 h-10 rounded-xl bg-white grid place-items-center text-[20px]">${it.icon||'🧋'}</div><div class="flex-1 min-w-0"><div class="font-semibold truncate">${it.name}</div><div class="text-[13px] text-[#d81b60] font-bold">${fmt(it.price)}</div></div><div class="flex items-center gap-1.5 bg-white rounded-xl p-1 shadow-sm"><button class="w-8 h-8 grid place-items-center text-[18px]" data-i="${i}" data-d="-1">−</button><span class="w-6 text-center font-bold">${it.qty}</span><button class="w-8 h-8 grid place-items-center text-[18px] bg-zinc-900 text-white rounded-lg" data-i="${i}" data-d="1">+</button></div>`;w.appendChild(row)});w.querySelectorAll('button').forEach(b=>b.onclick=()=>{const i=+b.dataset.i,d=+b.dataset.d;state.cart[i].qty+=d;if(state.cart[i].qty<=0)state.cart.splice(i,1);updateCartUI()})}
+function openCart(){$('cart-sheet').classList.remove('hidden');setTimeout(()=>$('cart-panel').classList.remove('translate-y-full'),10)}
+function closeCart(){$('cart-panel').classList.add('translate-y-full');setTimeout(()=>$('cart-sheet').classList.add('hidden'),250)}
+function genId(){const d=new Date(),p='NS'+d.getFullYear().toString().slice(-2)+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')+'-';const n=state.orders.filter(o=>o.id&&o.id.startsWith(p)).length+1;return p+String(n).padStart(3,'0')}
+function checkout(){if(!state.cart.length)return;const now=new Date(),id=genId(),order={id,table:state.table,items:state.cart.map(i=>({id:i.id,name:i.name,price:i.price,qty:i.qty})),total:state.cart.reduce((s,i)=>s+i.price*i.qty,0),time:now.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit',hour12:false}),timestamp:now.getTime(),date:getLocalDate(),status:'done'};if(db)db.ref('nhusay-pos/orders/'+id).set(order);state.orders.unshift(order);state.lastOrder=order;state.cart=[];updateCartUI();closeCart();showSuccess(order);renderOrders();renderRevenue()}
+function showSuccess(o){$('success-id').textContent=`${o.id} • ${o.table}`;$('success-total').textContent=fmt(o.total);$('success').classList.remove('hidden');$('success').classList.add('grid')}
+function hideSuccess(){$('success').classList.add('hidden');$('success').classList.remove('grid')}
+function printBill(o){const html=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${o.id}</title><style>@page{size:80mm auto;margin:3mm}body{font-family:'Be Vietnam Pro',Arial;width:74mm;font-size:13px}h1{font-size:20px;text-align:center;margin:0}.c{text-align:center;color:#666}.line{border-top:1px dashed #999;margin:6px 0}.r{display:flex;justify-content:space-between;margin:2px 0}.b{font-weight:700}.t{font-size:17px}</style></head><body><h1>TRÀ SỮA NHƯ SAY</h1><div class="c">0347.047.141 • Trà sữa đậm vị</div><div class="line"></div><div class="r"><span>Mã:</span><b>${o.id}</b></div><div class="r"><span>Bàn:</span><b>${o.table}</b></div><div class="r"><span>Giờ:</span><span>${o.time} ${o.date}</span></div><div class="line"></div>${o.items.map(i=>`<div class="r"><span>${i.name} ×${i.qty}</span><span>${fmt(i.price*i.qty)}</span></div>`).join('')}<div class="line"></div><div class="r t b"><span>TỔNG</span><span>${fmt(o.total)}</span></div><div class="line"></div><div class="c">Cảm ơn quý khách!</div><script>onload=()=>{print();setTimeout(close,300)}</script></body></html>`;const w=open('','_blank');w.document.write(html);w.document.close()}
+function renderOrders(){const list=$('orders-list'),today=getLocalDate(),todayOrders=state.orders.filter(o=>o.date===today);$('orders-count').textContent=todayOrders.length;list.innerHTML='';if(!todayOrders.length){list.innerHTML=`<div class="text-center py-16 text-zinc-400">Chưa có đơn</div>`;return}todayOrders.forEach(o=>{const el=document.createElement('div');el.className='bg-white rounded-[20px] p-4 shadow-soft border border-zinc-100';el.innerHTML=`<div class="flex justify-between items-start"><div><div class="font-bold">${o.id}</div><div class="text-[12px] text-zinc-500 mt-0.5">${o.table} • ${o.time}</div></div><div class="text-right"><div class="font-extrabold text-[#d81b60]">${fmt(o.total)}</div><button class="text-[11px] underline text-zinc-500 mt-1">In lại</button></div></div><div class="text-[12px] text-zinc-600 mt-2 truncate">${o.items.map(i=>`${i.name}×${i.qty}`).join(' • ')}</div>`;el.querySelector('button').onclick=()=>printBill(o);list.appendChild(el)})}
+function renderRevenue(){const today=getLocalDate(),todayOrders=state.orders.filter(o=>o.date===today),total=todayOrders.reduce((s,o)=>s+o.total,0);$('rev-total').textContent=fmt(total);$('rev-count').textContent=todayOrders.length;const top={};todayOrders.forEach(o=>o.items.forEach(i=>top[i.name]=(top[i.name]||0)+i.qty));const sorted=Object.entries(top).sort((a,b)=>b[1]-a[1]).slice(0,5);$('rev-top').innerHTML=sorted.length?sorted.map(([n,q],i)=>`<div class="flex items-center justify-between py-2.5"><div class="flex items-center gap-2.5"><span class="w-6 h-6 rounded-full bg-zinc-100 grid place-items-center text-[12px] font-bold">${i+1}</span><span>${n}</span></div><span class="font-bold">${q}</span></div>`).join(''):`<div class="py-8 text-center text-zinc-400">Chưa có dữ liệu</div>`}
+function renderMenuList(){const list=$('menu-list');list.innerHTML='';state.products.forEach(p=>{const row=document.createElement('div');row.className='bg-white rounded-[20px] p-3 shadow-soft flex items-center gap-3';row.innerHTML=`<div class="w-10 h-10 rounded-xl bg-pink-50 grid place-items-center text-[20px]">${p.icon}</div><div class="flex-1 min-w-0"><div class="font-semibold truncate">${p.name}</div><div class="text-[12px] text-zinc-500">${p.category}</div></div><input type="number" value="${p.price}" class="w-[90px] h-9 px-2 rounded-xl bg-zinc-100 text-right font-medium outline-none focus:ring-2 focus:ring-pink-500/30">`;row.querySelector('input').onchange=e=>{p.price=parseInt(e.target.value)||0;if(db)db.ref('nhusay-pos/menu/'+p.id+'/price').set(p.price);renderProducts()};list.appendChild(row)})}
+function switchTab(t){document.querySelectorAll('[id^=tab-]').forEach(s=>s.classList.add('hidden'));$('tab-'+t).classList.remove('hidden');document.querySelectorAll('.tab-btn').forEach(b=>{const a=b.dataset.tab===t;b.classList.toggle('text-pink-600',a);b.classList.toggle('text-zinc-400',!a);b.querySelector('span').classList.toggle('font-semibold',a)})}
+function bindEvents(){$('search').oninput=e=>{state.search=e.target.value;renderProducts()};$('cart-bar-inner').onclick=openCart;$('btn-checkout').onclick=e=>{e.stopPropagation();openCart()};$('cart-close').onclick=closeCart;$('cart-backdrop').onclick=closeCart;$('cart-checkout').onclick=checkout;$('success-done').onclick=hideSuccess;$('success-print').onclick=()=>{if(state.lastOrder)printBill(state.lastOrder);hideSuccess()};document.querySelectorAll('.tab-btn').forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));$('btn-add-product').onclick=()=>{const name=prompt('Tên món:');if(!name)return;const price=parseInt(prompt('Giá:')||'0');const p={id:'p'+Date.now(),name,price,category:'Trà Sữa',active:true,icon:'🧋'};state.products.push(p);if(db)db.ref('nhusay-pos/menu/'+p.id).set(p);updateCategories();renderProducts();renderMenuList()}}
+$('login-form').onsubmit=e=>{e.preventDefault();if($('password').value.trim()==='260426'){$('login').classList.add('hidden');$('app').classList.remove('hidden');init()}else{$('login-error').textContent='Sai mật khẩu';$('password').value=''}};
 </script>
 </body>
 </html>
