@@ -178,7 +178,31 @@ function renderCartItems(){ const wrap=$('cart-items'); wrap.innerHTML=''; if(st
 function openCart(){ $('cart-sheet').classList.remove('hidden'); setTimeout(()=>$('cart-panel').classList.remove('translate-y-full'),10); }
 function closeCart(){ $('cart-panel').classList.add('translate-y-full'); setTimeout(()=>$('cart-sheet').classList.add('hidden'),300); }
 function generateOrderId(){ const d=new Date(); const yymmdd=d.getFullYear().toString().slice(-2)+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0'); const prefix='NS'+yymmdd+'-'; const todayOrders=state.orders.filter(o=>o.id&&o.id.startsWith(prefix)); return prefix+String(todayOrders.length+1).padStart(3,'0'); }
-function checkout(){ if(state.cart.length===0) return; const id=generateOrderId(); const now=new Date(); const order={ id, table:state.table, items:state.cart.map(i=>({id:i.id||'',name:i.name,price:i.price,qty:i.qty})), total:state.cart.reduce((s,i)=>s+i.price*i.qty,0), time:now.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'}), timestamp:now.getTime(), date:getLocalDate(), status:'done' }; if(db){ db.ref('nhusay-pos/orders/'+id).set(order).catch(()=>{}); } state.orders.unshift(order); state.lastOrder=order; state.cart=[]; updateCartUI(); closeCart(); showSuccess(order); renderOrders(); renderRevenue(); }
+function checkout(){
+  if(state.cart.length===0) return;
+  const id=generateOrderId();
+  const now=new Date();
+  // LƯU GIỜ THẬT VN
+  const order={
+    id,
+    table:state.table,
+    items:state.cart.map(i=>({id:i.id||'',name:i.name,price:i.price,qty:i.qty})),
+    total:state.cart.reduce((s,i)=>s+i.price*i.qty,0),
+    time:now.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit',hour12:false}), // "16:59"
+    timestamp:now.getTime(), // 1745582396000
+    date:getLocalDate(), // "2026-04-25" - GIỜ VN THẬT
+    status:'done'
+  };
+  if(db){ db.ref('nhusay-pos/orders/'+id).set(order); }
+  state.orders.unshift(order);
+  state.lastOrder=order;
+  state.cart=[];
+  updateCartUI();
+  closeCart();
+  showSuccess(order);
+  renderOrders();
+  renderRevenue();
+}
 function showSuccess(order){ $('success-id').textContent=`Mã đơn: ${order.id} • ${order.table}`; $('success-total').textContent=formatPrice(order.total); $('success').classList.remove('hidden'); $('success').classList.add('flex'); }
 function hideSuccess(){ $('success').classList.add('hidden'); $('success').classList.remove('flex'); }
 function printBill(order){ const html=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${order.id}</title><style>@page{size:80mm auto;margin:2mm}*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Be Vietnam Pro',Arial,sans-serif;width:76mm;font-size:13px;color:#000;padding:2mm;line-height:1.35}.c{text-align:center}.b{font-weight:700}.lg{font-size:18px}.line{border-top:1px dashed #000;margin:5px 0}.r{display:flex;justify-content:space-between}.mt4{margin-top:4px}</style></head><body><div class="c b lg">TRÀ SỮA NHƯ SAY</div><div class="c" style="font-size:11px">Ngon như say, say như nghiện</div><div class="line"></div><div class="r"><span>HĐ: <span class="b">${order.id}</span></span><span>${order.time}</span></div><div>Bàn: <span class="b">${order.table}</span></div><div class="line"></div>${order.items.map(i=>`<div class="r"><span>${i.name} x${i.qty}</span><span>${formatPrice(i.price*i.qty)}</span></div>`).join('')}<div class="line"></div><div class="r b" style="font-size:16px"><span>TỔNG CỘNG</span><span>${formatPrice(order.total)}</span></div><div class="line"></div><div class="c mt4">Cảm ơn quý khách!</div><script>window.onload=()=>{setTimeout(()=>{window.print();window.close()},200)}<\/script></body></html>`; const w=window.open('','_blank'); if(w){ w.document.write(html); w.document.close(); } }
