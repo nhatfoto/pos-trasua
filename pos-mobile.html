@@ -242,6 +242,9 @@ try {
 function formatPrice(n){ return new Intl.NumberFormat('vi-VN').format(n)+'đ'; }
 
 function init(){
+  // Hiển thị menu mẫu ngay để không bị trống khi Firebase chưa có dữ liệu
+  state.products = SAMPLE_MENU;
+  updateCategories(); renderProducts();
   renderTables();
   loadData();
   bindEvents();
@@ -250,18 +253,18 @@ function init(){
 
 function loadData(){
   if(db){
-    db.ref('ns/menu').on('value', snap => {
+    db.ref('nhusay-pos/menu').on('value', snap => {
       const val = snap.val();
       state.products = val ? Object.values(val) : SAMPLE_MENU;
-      if(!val){ SAMPLE_MENU.forEach(p => db.ref('ns/menu/'+p.id).set(p)); }
+      if(!val){ SAMPLE_MENU.forEach(p => db.ref('nhusay-pos/menu/'+p.id).set(p)); }
       updateCategories(); renderProducts(); renderMenuList();
     });
-    db.ref('ns/orders').limitToLast(200).on('value', snap => {
+    db.ref('nhusay-pos/orders').limitToLast(200).on('value', snap => {
       const val = snap.val();
       state.orders = val ? Object.values(val).sort((a,b)=>b.timestamp-a.timestamp) : [];
       renderOrders(); renderRevenue();
     });
-    db.ref('ns/settings/tables').on('value', snap => {
+    db.ref('nhusay-pos/settings/tables').on('value', snap => {
       if(snap.exists()){ state.tables = snap.val(); renderTables(); }
     });
   } else {
@@ -384,7 +387,7 @@ function checkout(){
     date: now.toISOString().split('T')[0],
     status: 'done'
   };
-  if(db){ db.ref('ns/orders/'+id).set(order).catch(()=>{}); }
+  if(db){ db.ref('nhusay-pos/orders/'+id).set(order).catch(()=>{}); }
   state.orders.unshift(order);
   state.lastOrder = order;
   state.cart = [];
@@ -458,8 +461,8 @@ function renderMenuList(){
     div.className = 'bg-white rounded-2xl p-3 shadow-sm border flex items-center gap-3';
     div.innerHTML = `<div class="flex-1"><div class="font-medium text-[14px]">${p.name}</div><div class="text-[12px] text-gray-500">${p.category}</div></div><input type="number" value="${p.price}" class="w-24 h-10 px-2 rounded-xl bg-gray-100 text-right text-[15px] outline-none focus:ring-2 focus:ring-pink-500" data-id="${p.id}"><label class="flex items-center gap-1 text-[12px]"><input type="checkbox" ${p.active?'checked':''} data-active="${p.id}"> Hiện</label>`;
     const inp = div.querySelector('input[type=number]');
-    inp.onchange = ()=>{ p.price = parseInt(inp.value)||0; if(db) db.ref('ns/menu/'+p.id+'/price').set(p.price); renderProducts(); };
-    div.querySelector('input[type=checkbox]').onchange = (e)=>{ p.active=e.target.checked; if(db) db.ref('ns/menu/'+p.id+'/active').set(p.active); updateCategories(); renderProducts(); };
+    inp.onchange = ()=>{ p.price = parseInt(inp.value)||0; if(db) db.ref('nhusay-pos/menu/'+p.id+'/price').set(p.price); renderProducts(); };
+    div.querySelector('input[type=checkbox]').onchange = (e)=>{ p.active=e.target.checked; if(db) db.ref('nhusay-pos/menu/'+p.id+'/active').set(p.active); updateCategories(); renderProducts(); };
     list.appendChild(div);
   });
 }
@@ -492,7 +495,7 @@ function bindEvents(){
     const id = 'p'+Date.now();
     const p = {id,name,price,category:cat,active:true};
     state.products.push(p);
-    if(db) db.ref('ns/menu/'+id).set(p);
+    if(db) db.ref('nhusay-pos/menu/'+id).set(p);
     updateCategories(); renderProducts(); renderMenuList();
   };
 }
