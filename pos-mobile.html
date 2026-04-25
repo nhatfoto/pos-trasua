@@ -12,34 +12,43 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
 <style>
   *{ -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
   html{ -webkit-text-size-adjust:100%; }
-  body{ font-family:'Be Vietnam Pro',system-ui,-apple-system,sans-serif; overscroll-behavior-y:contain; background:#f9fafb; }
-  input, select, textarea, button{ font-size:18px; }
+  body{ font-family:'Be Vietnam Pro',system-ui,-apple-system,sans-serif; overscroll-behavior-y:contain; background:#fff5f9; }
+  input, select, textarea, button{ font-size:17px; }
   .no-scrollbar{ -ms-overflow-style:none; scrollbar-width:none; }
   .no-scrollbar::-webkit-scrollbar{ display:none; }
   .safe-bottom{ padding-bottom: max(0.5rem, env(safe-area-inset-bottom)); }
   button{ min-height:44px; min-width:44px; }
-  .touch-44{ min-height:44px; min-width:44px; }
+  .kawaii-bg{ background: linear-gradient(180deg,#fff0f6 0%,#fff5f9 40%,#fff 100%); }
+  .kawaii-card{ background:#fff; border-radius:28px; box-shadow:0 6px 20px rgba(255,143,171,0.15); border:2px solid #ffe4ec; }
+  .kawaii-btn{ border-radius:22px; transition:all 0.15s; }
+  .kawaii-btn:active{ transform:scale(0.96); }
+  .bubble{ position:relative; }
+  .bubble::after{ content:''; position:absolute; width:8px; height:8px; background:#ffd6e0; border-radius:50%; top:-4px; right:12px; box-shadow:16px 8px 0 -2px #ffd6e0; }
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+  .float{ animation:float 3s ease-in-out infinite; }
 </style>
+
 </head>
-<body class="bg-gray-50 text-gray-900 select-none">
+<body class="kawaii-bg text-gray-800 select-none">
 
 <!-- LOGIN -->
-<div id="login" class="fixed inset-0 z-[200] flex items-center justify-center p-6" style="background:linear-gradient(135deg,#d81b60 0%,#ff6b9d 100%)">
+<div id="login" class="fixed inset-0 z-[200] flex items-center justify-center p-6" style="background:linear-gradient(135deg,#ff8fab 0%,#ffc2d1 50%,#ffe4ec 100%)">
   <div class="w-full max-w-[340px] bg-white rounded-[28px] shadow-2xl p-8 text-center">
-    <div class="w-20 h-20 mx-auto rounded-2xl flex items-center justify-center mb-4 shadow-lg" style="background:linear-gradient(135deg,#d81b60,#ff6b9d)">
+    <div class="w-20 h-20 mx-auto rounded-2xl flex items-center justify-center mb-4 shadow-lg" style="background:linear-gradient(135deg,#ff8fab,#ff5d8f)">
       <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
         <path d="M8 7V5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M7 7h10l1 9a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2l1-9z"/>
         <path d="M10 11v4M14 11v4"/>
       </svg>
     </div>
-    <h1 class="text-[26px] font-bold leading-tight">Trà Sữa Như Say</h1>
+    <h1 class="text-[26px] font-bold leading-tight">Trà Sữa Như Say 🧋</h1><p class="text-pink-400 text-[13px] mt-1">kawaii version</p>
     <p class="text-gray-500 mt-1 mb-6">Hệ thống bán hàng</p>
     <form id="login-form" class="space-y-4">
       <input id="password" type="password" inputmode="numeric" pattern="[0-9]*" placeholder="Nhập mật khẩu" class="w-full h-[56px] px-4 rounded-2xl bg-gray-100 text-center tracking-[0.3em] text-[18px] font-medium outline-none focus:ring-2 focus:ring-pink-500" autocomplete="off" autocapitalize="off">
-      <button type="submit" class="w-full h-[56px] rounded-2xl text-white font-bold text-[17px] active:scale-[0.98] transition shadow-lg" style="background:linear-gradient(135deg,#d81b60,#ff6b9d)">Đăng nhập</button>
+      <button type="submit" class="w-full h-[56px] rounded-2xl text-white font-bold text-[17px] active:scale-[0.98] transition shadow-lg" style="background:linear-gradient(135deg,#ff8fab,#ff5d8f)">Đăng nhập</button>
       <p id="login-error" class="text-red-500 text-[14px] h-5"></p>
     </form>
   </div>
@@ -48,7 +57,7 @@
 <!-- APP -->
 <div id="app" class="hidden h-[100dvh] flex flex-col max-w-[480px] mx-auto bg-gray-50 relative">
   <!-- TOP BAR -->
-  <header class="shrink-0 text-white shadow-lg relative z-30" style="background:linear-gradient(135deg,#d81b60,#ff6b9d); padding-top:env(safe-area-inset-top)">
+  <header class="shrink-0 text-white shadow-lg relative z-30" style="background:linear-gradient(135deg,#ff8fab,#ffb3c6); padding-top:env(safe-area-inset-top)">
     <div class="flex items-center gap-3 px-4 pt-3 pb-2">
       <div class="w-10 h-10 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
@@ -91,7 +100,7 @@
     <section id="tab-menu" class="hidden p-3 pb-[120px]">
       <div class="flex items-center justify-between mb-3">
         <h2 class="text-lg font-bold">Quản lý Menu</h2>
-        <button id="btn-add-product" class="h-9 px-3 rounded-xl text-white text-sm font-medium" style="background:linear-gradient(135deg,#d81b60,#ff6b9d)">+ Thêm món</button>
+        <button id="btn-add-product" class="h-9 px-3 rounded-xl text-white text-sm font-medium" style="background:linear-gradient(135deg,#ff8fab,#ff5d8f)">+ Thêm món</button>
       </div>
       <div id="menu-list" class="space-y-2"></div>
     </section>
@@ -101,7 +110,7 @@
       <div class="grid grid-cols-2 gap-3 mb-4">
         <div class="bg-white rounded-2xl p-4 shadow-sm">
           <div class="text-xs text-gray-500">Tổng bán</div>
-          <div id="rev-total" class="text-2xl font-bold text-pink-600 mt-1">0đ</div>
+          <div id="rev-total" class="text-2xl font-bold text-[#ff5d8f] mt-1">0đ</div>
         </div>
         <div class="bg-white rounded-2xl p-4 shadow-sm">
           <div class="text-xs text-gray-500">Số đơn</div>
@@ -120,16 +129,16 @@
     <div class="mx-3 mb-2">
       <div id="cart-bar-inner" class="bg-white rounded-[20px] shadow-[0_8px_24px_rgba(0,0,0,0.15)] border border-pink-100 p-3 flex items-center justify-between active:scale-[0.98] transition">
         <div class="flex items-center gap-3">
-          <div class="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold shadow-md relative" style="background:linear-gradient(135deg,#d81b60,#ff6b9d)">
+          <div class="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold shadow-md relative" style="background:linear-gradient(135deg,#ff8fab,#ff5d8f)">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M9 8h-3l4-4 4 4h-3v8h-2z"/><circle cx="8.5" cy="19.5" r="1.5"/><circle cx="17.5" cy="19.5" r="1.5"/></svg>
             <span id="cart-count" class="absolute -top-1.5 -right-1.5 bg-yellow-400 text-[11px] text-gray-900 font-bold w-5 h-5 rounded-full flex items-center justify-center">0</span>
           </div>
           <div>
             <div class="text-[12px] text-gray-500 leading-none">Giỏ hàng</div>
-            <div id="cart-total" class="text-[18px] font-bold text-pink-600 leading-tight">0đ</div>
+            <div id="cart-total" class="text-[18px] font-bold text-[#ff5d8f] leading-tight">0đ</div>
           </div>
         </div>
-        <button id="btn-checkout" class="h-12 px-6 rounded-xl text-white font-bold text-[15px] shadow-md active:scale-95" style="background:linear-gradient(135deg,#d81b60,#ff6b9d)">Thanh toán</button>
+        <button id="btn-checkout" class="h-12 px-6 rounded-xl text-white font-bold text-[15px] shadow-md active:scale-95" style="background:linear-gradient(135deg,#ff8fab,#ff5d8f)">Thanh toán</button>
       </div>
     </div>
   </div>
@@ -137,7 +146,7 @@
   <!-- BOTTOM TABS -->
   <nav class="fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-lg border-t border-gray-200 max-w-[480px] mx-auto safe-bottom">
     <div class="grid grid-cols-4 h-[72px]">
-      <button data-tab="ban-hang" class="tab-btn flex flex-col items-center justify-center gap-1 text-[11px] font-medium text-pink-600">
+      <button data-tab="ban-hang" class="tab-btn flex flex-col items-center justify-center gap-1 text-[11px] font-medium text-[#ff5d8f]">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
         <span>Bán hàng</span>
       </button>
@@ -163,16 +172,16 @@
   <div id="cart-panel" class="absolute bottom-0 left-0 right-0 bg-white rounded-t-[28px] max-h-[85vh] flex flex-col translate-y-full transition-transform duration-300 max-w-[480px] mx-auto shadow-2xl">
     <div class="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mt-3 shrink-0"></div>
     <div class="flex items-center justify-between px-4 py-3 border-b shrink-0">
-      <h3 class="text-[18px] font-bold">Giỏ hàng • <span id="cart-table-name" class="text-pink-600">Mang về</span></h3>
+      <h3 class="text-[18px] font-bold">Giỏ hàng • <span id="cart-table-name" class="text-[#ff5d8f]">Mang về</span></h3>
       <button id="cart-close" class="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center active:scale-90">✕</button>
     </div>
     <div id="cart-items" class="flex-1 overflow-y-auto p-3 space-y-2"></div>
     <div class="p-4 border-t bg-gray-50 safe-bottom shrink-0">
       <div class="flex justify-between items-center mb-3">
         <span class="text-[15px] font-medium text-gray-600">Tổng cộng</span>
-        <span id="cart-sheet-total" class="text-[24px] font-bold text-pink-600">0đ</span>
+        <span id="cart-sheet-total" class="text-[24px] font-bold text-[#ff5d8f]">0đ</span>
       </div>
-      <button id="cart-checkout" class="w-full h-[52px] rounded-2xl text-white font-bold text-[17px] shadow-lg active:scale-[0.98]" style="background:linear-gradient(135deg,#d81b60,#ff6b9d)">Xác nhận thanh toán</button>
+      <button id="cart-checkout" class="w-full h-[52px] rounded-2xl text-white font-bold text-[17px] shadow-lg active:scale-[0.98]" style="background:linear-gradient(135deg,#ff8fab,#ff5d8f)">Xác nhận thanh toán</button>
     </div>
   </div>
 </div>
@@ -180,15 +189,15 @@
 <!-- SUCCESS -->
 <div id="success" class="fixed inset-0 z-[60] hidden items-center justify-center p-6 bg-black/60 backdrop-blur-sm">
   <div class="bg-white rounded-[28px] p-7 w-full max-w-[320px] text-center shadow-2xl">
-    <div class="w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-4" style="background:linear-gradient(135deg,#d81b60,#ff6b9d)">
+    <div class="w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-4" style="background:linear-gradient(135deg,#ff8fab,#ff5d8f)">
       <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
     </div>
     <h3 class="text-[22px] font-bold">Thành công!</h3>
     <p id="success-id" class="text-gray-500 mt-1 text-[14px]"></p>
-    <p id="success-total" class="text-[28px] font-bold text-pink-600 mt-2"></p>
+    <p id="success-total" class="text-[28px] font-bold text-[#ff5d8f] mt-2"></p>
     <div class="grid grid-cols-2 gap-3 mt-6">
       <button id="success-done" class="h-12 rounded-xl bg-gray-100 font-semibold text-[15px] active:scale-95">Xong</button>
-      <button id="success-print" class="h-12 rounded-xl text-white font-semibold text-[15px] shadow-md active:scale-95" style="background:linear-gradient(135deg,#d81b60,#ff6b9d)">In bill</button>
+      <button id="success-print" class="h-12 rounded-xl text-white font-semibold text-[15px] shadow-md active:scale-95" style="background:linear-gradient(135deg,#ff8fab,#ff5d8f)">In bill</button>
     </div>
   </div>
 </div>
@@ -285,7 +294,7 @@ function renderTables(){
   state.tables.forEach(t=>{
     const btn = document.createElement('button');
     const active = t===state.table;
-    btn.className = `px-4 h-9 rounded-full text-[14px] font-medium whitespace-nowrap border transition active:scale-95 ${active?'bg-white text-pink-600 border-white shadow-md':'bg-white/15 text-white border-white/30 backdrop-blur'}`;
+    btn.className = `px-4 h-9 rounded-full text-[14px] font-medium whitespace-nowrap border transition active:scale-95 ${active?'bg-white text-[#ff5d8f] border-white shadow-md':'bg-white/15 text-white border-white/30 backdrop-blur'}`;
     btn.textContent = t;
     btn.onclick = ()=>{ state.table=t; $('cart-table-name').textContent=t; renderTables(); };
     wrap.appendChild(btn);
@@ -298,7 +307,7 @@ function renderCategories(){
     const btn = document.createElement('button');
     const active = c===state.activeCategory;
     btn.className = `px-4 h-9 rounded-full text-[14px] font-medium whitespace-nowrap transition active:scale-95 ${active?'text-white shadow-md':'bg-gray-100 text-gray-700'}`;
-    if(active) btn.style.background = 'linear-gradient(135deg,#d81b60,#ff6b9d)';
+    if(active) btn.style.background = 'linear-gradient(135deg,#ff8fab,#ff5d8f)';
     btn.textContent = c;
     btn.onclick = ()=>{ state.activeCategory=c; renderCategories(); renderProducts(); };
     wrap.appendChild(btn);
@@ -311,8 +320,8 @@ function renderProducts(){
   const list = state.products.filter(p=>p.active!==false && (state.activeCategory==='Tất cả' || p.category===state.activeCategory) && (!kw || p.name.toLowerCase().includes(kw)));
   list.forEach(p=>{
     const btn = document.createElement('button');
-    btn.className = 'bg-white rounded-[20px] p-3.5 shadow-sm border border-gray-100 text-left active:scale-[0.97] transition min-h-[90px] flex flex-col justify-between hover:shadow-md';
-    btn.innerHTML = `<div><div class="text-[13px] font-semibold leading-snug line-clamp-2 min-h-[36px]">${p.name}</div><div class="text-[11px] text-gray-400 mt-1">${p.category}</div></div><div class="flex items-center justify-between mt-2"><span class="text-[17px] font-bold" style="color:#d81b60">${formatPrice(p.price)}</span><span class="w-7 h-7 rounded-full flex items-center justify-center text-white" style="background:linear-gradient(135deg,#d81b60,#ff6b9d)">+</span></div>`;
+    btn.className = 'kawaii-card p-4 text-left active:scale-[0.97] transition min-h-[110px] flex flex-col justify-between kawaii-btn bubble';
+    btn.innerHTML = `<div><div class="text-[13px] font-semibold leading-snug line-clamp-2 min-h-[36px]">${p.name}</div><div class="text-[11px] text-gray-400 mt-1">${p.category}</div></div><div class="flex items-center justify-between mt-2"><span class="text-[17px] font-bold" style="color:#d81b60">${formatPrice(p.price)}</span><span class="w-7 h-7 rounded-full flex items-center justify-center text-white" style="background:linear-gradient(135deg,#ff8fab,#ff5d8f)">+</span></div>`;
     btn.onclick = ()=> addToCart(p);
     grid.appendChild(btn);
   });
@@ -348,7 +357,7 @@ function renderCartItems(){
   state.cart.forEach((item,idx)=>{
     const div = document.createElement('div');
     div.className = 'flex items-center gap-3 bg-gray-50 rounded-2xl p-3';
-    div.innerHTML = `<div class="flex-1"><div class="font-medium text-[15px]">${item.name}</div><div class="text-pink-600 font-bold text-[15px]">${formatPrice(item.price)}</div></div><div class="flex items-center gap-2"><button data-idx="${idx}" data-act="dec" class="w-11 h-11 rounded-xl bg-white border text-[20px] font-medium active:scale-90">−</button><span class="w-8 text-center font-bold">${item.qty}</span><button data-idx="${idx}" data-act="inc" class="w-11 h-11 rounded-xl text-white text-[20px] font-medium active:scale-90" style="background:linear-gradient(135deg,#d81b60,#ff6b9d)">+</button></div>`;
+    div.innerHTML = `<div class="flex-1"><div class="font-medium text-[15px]">${item.name}</div><div class="text-[#ff5d8f] font-bold text-[15px]">${formatPrice(item.price)}</div></div><div class="flex items-center gap-2"><button data-idx="${idx}" data-act="dec" class="w-11 h-11 rounded-xl bg-white border text-[20px] font-medium active:scale-90">−</button><span class="w-8 text-center font-bold">${item.qty}</span><button data-idx="${idx}" data-act="inc" class="w-11 h-11 rounded-xl text-white text-[20px] font-medium active:scale-90" style="background:linear-gradient(135deg,#ff8fab,#ff5d8f)">+</button></div>`;
     wrap.appendChild(div);
   });
   wrap.querySelectorAll('button').forEach(b=>{
@@ -407,7 +416,26 @@ function hideSuccess(){ $('success').classList.add('hidden'); $('success').class
 
 function printBill(order){
   const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${order.id}</title>
-  <style>@page{size:80mm auto;margin:2mm}*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Be Vietnam Pro',Arial,sans-serif;width:76mm;font-size:13px;color:#000;padding:2mm;line-height:1.35}.c{text-align:center}.b{font-weight:700}.lg{font-size:18px}.line{border-top:1px dashed #000;margin:5px 0}.r{display:flex;justify-content:space-between}.mt4{margin-top:4px}</style></head><body>
+  
+<style>
+  *{ -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+  html{ -webkit-text-size-adjust:100%; }
+  body{ font-family:'Be Vietnam Pro',system-ui,-apple-system,sans-serif; overscroll-behavior-y:contain; background:#fff5f9; }
+  input, select, textarea, button{ font-size:17px; }
+  .no-scrollbar{ -ms-overflow-style:none; scrollbar-width:none; }
+  .no-scrollbar::-webkit-scrollbar{ display:none; }
+  .safe-bottom{ padding-bottom: max(0.5rem, env(safe-area-inset-bottom)); }
+  button{ min-height:44px; min-width:44px; }
+  .kawaii-bg{ background: linear-gradient(180deg,#fff0f6 0%,#fff5f9 40%,#fff 100%); }
+  .kawaii-card{ background:#fff; border-radius:28px; box-shadow:0 6px 20px rgba(255,143,171,0.15); border:2px solid #ffe4ec; }
+  .kawaii-btn{ border-radius:22px; transition:all 0.15s; }
+  .kawaii-btn:active{ transform:scale(0.96); }
+  .bubble{ position:relative; }
+  .bubble::after{ content:''; position:absolute; width:8px; height:8px; background:#ffd6e0; border-radius:50%; top:-4px; right:12px; box-shadow:16px 8px 0 -2px #ffd6e0; }
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+  .float{ animation:float 3s ease-in-out infinite; }
+</style>
+</head><body>
   <div class="c b lg">TRÀ SỮA NHƯ SAY</div>
   <div class="c" style="font-size:11px">Ngon như say, say như nghiện</div>
   <div class="c" style="font-size:11px">ĐT: 0909.xxx.xxx</div>
@@ -436,7 +464,7 @@ function renderOrders(){
   todayOrders.forEach(o=>{
     const div = document.createElement('div');
     div.className = 'bg-white rounded-2xl p-3.5 shadow-sm border border-gray-100 active:scale-[0.99]';
-    div.innerHTML = `<div class="flex justify-between items-start"><div><div class="font-bold text-[15px]">${o.id}</div><div class="text-[12px] text-gray-500 mt-0.5">${o.table} • ${o.time}</div></div><div class="text-right"><div class="font-bold text-pink-600">${formatPrice(o.total)}</div><button class="text-[11px] text-gray-500 mt-1 underline print-btn">In lại</button></div></div><div class="text-[12px] text-gray-600 mt-2 line-clamp-1">${o.items.map(i=>i.name+' x'+i.qty).join(' • ')}</div>`;
+    div.innerHTML = `<div class="flex justify-between items-start"><div><div class="font-bold text-[15px]">${o.id}</div><div class="text-[12px] text-gray-500 mt-0.5">${o.table} • ${o.time}</div></div><div class="text-right"><div class="font-bold text-[#ff5d8f]">${formatPrice(o.total)}</div><button class="text-[11px] text-gray-500 mt-1 underline print-btn">In lại</button></div></div><div class="text-[12px] text-gray-600 mt-2 line-clamp-1">${o.items.map(i=>i.name+' x'+i.qty).join(' • ')}</div>`;
     div.querySelector('.print-btn').onclick = (e)=>{ e.stopPropagation(); printBill(o); };
     list.appendChild(div);
   });
@@ -473,7 +501,7 @@ function switchTab(tab){
   $('tab-'+tab).classList.remove('hidden');
   document.querySelectorAll('.tab-btn').forEach(b=>{
     const active = b.dataset.tab===tab;
-    b.classList.toggle('text-pink-600', active);
+    b.classList.toggle('text-[#ff5d8f]', active);
     b.classList.toggle('text-gray-400', !active);
   });
 }
