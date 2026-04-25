@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trà Sữa Như Say</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#fff5f7}
+.topbar{position:fixed;top:0;left:0;right:0;z-index:100;padding:10px 16px;display:flex;justify-content:flex-end;background:linear-gradient(to bottom,rgba(0,0,0,.25),transparent);backdrop-filter:blur(2px)}
+.login-btn{background:white;color:#ff6b9d;border:none;padding:8px 18px;border-radius:999px;font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.15);font-size:.9rem}
+.login-btn:hover{transform:translateY(-1px)}
+.menu-img{width:100%;height:auto;display:block;max-width:1400px;margin:0 auto}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;align-items:center;justify-content:center;padding:20px}
+.modal.show{display:flex}
+.box{background:white;border-radius:16px;padding:24px;width:100%;max-width:320px;box-shadow:0 10px 40px rgba(0,0,0,.3)}
+.box h3{color:#ff6b9d;text-align:center;margin-bottom:16px}
+.box input{width:100%;padding:11px;border:2px solid #ffe1ea;border-radius:10px;margin-bottom:10px;font-size:1rem}
+.box input:focus{outline:none;border-color:#ff6b9d}
+.box button{width:100%;padding:11px;background:linear-gradient(135deg,#ff6b9d,#ff8fab);color:white;border:none;border-radius:10px;font-weight:700;cursor:pointer}
+.error{color:#ff4757;text-align:center;margin-top:8px;font-size:.85rem;display:none}
+@media(max-width:600px){.topbar{padding:8px 12px}.login-btn{padding:7px 14px;font-size:.85rem}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <button class="login-btn" onclick="openLogin()">Đăng nhập</button>
+</div>
+
+<img src="menu.jpg" alt="Menu Trà Sữa Như Say" class="menu-img">
+
+<div id="loginModal" class="modal" onclick="if(event.target.id==='loginModal')closeLogin()">
+  <div class="box">
+    <h3>🧋 Đăng nhập</h3>
+    <input id="user" placeholder="Tài khoản" autocomplete="username">
+    <input id="pass" type="password" placeholder="Mật khẩu" autocomplete="current-password">
+    <button onclick="doLogin()">Vào bán hàng</button>
+    <div id="err" class="error">Sai tài khoản!</div>
+  </div>
+</div>
+
+<script>
+function openLogin(){document.getElementById('loginModal').classList.add('show');document.getElementById('user').focus()}
+function closeLogin(){document.getElementById('loginModal').classList.remove('show')}
+function doLogin(){
+  const u=document.getElementById('user').value.trim().toLowerCase();
+  const p=document.getElementById('pass').value;
+  const acc={admin:{pass:'260426',name:'Admin'},nhanvien:{pass:'140799',name:'Nhân viên'}};
+  if(acc[u]&&acc[u].pass===p){
+    sessionStorage.setItem('tsns_user',JSON.stringify({user:u,name:acc[u].name,role:u==='admin'?'admin':'staff'}));
+    location.href='pos.html';
+  }else{document.getElementById('err').style.display='block'}
+}
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&document.getElementById('loginModal').classList.contains('show'))doLogin()});
+</script>
+</body>
+</html>
