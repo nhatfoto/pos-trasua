@@ -40,6 +40,7 @@
           <h1 class="text-[20px] font-bold leading-tight bg-gradient-to-r from-[#d81b60] to-[#ff6b9d] bg-clip-text text-transparent">Trà Sữa Như Say</h1>
           <p class="text-xs text-gray-500 -mt-0.5">0347.047.141 • Premium POS</p>
         </div>
+      </div>
       <div class="flex items-center gap-2">
         <span class="hidden md:block px-3 py-1.5 bg-[#ffe4ee] text-[#d81b60] rounded-full text-sm font-medium" id="headerUser">Chủ quán</span>
         <div class="w-9 h-9 rounded-full bg-gradient-to-br from-[#d81b60] to-[#ff6b9d] flex items-center justify-center text-white font-bold shadow">N</div>
@@ -304,9 +305,9 @@ let revenueChart;
 
 const fmt = n => new Intl.NumberFormat('vi-VN').format(n||0)+'₫';
 const saveCarts = () => localStorage.setItem('ns_carts', JSON.stringify(state.carts));
+function getLocalDate(){ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
 
 document.addEventListener('DOMContentLoaded', ()=>{
-  // KHÓA MẬT KHẨU ĐƠN GIẢN
   const PASS = '260426';
   const lock = document.getElementById('loginLock');
   const app = document.getElementById('appWrap');
@@ -323,14 +324,10 @@ document.addEventListener('DOMContentLoaded', ()=>{
     } else {
       pwError.textContent = 'Sai mật khẩu!';
       pwInput.value=''; pwInput.focus();
-      navigator.vibrate && navigator.vibrate(50);
     }
   }
   pwBtn.onclick = unlock;
   pwInput.onkeypress = e=>{ if(e.key==='Enter') unlock(); };
-  
-  // Luôn yêu cầu nhập mã mỗi lần vào
-  localStorage.removeItem('ns_auth');
   pwInput.focus();
 });
 
@@ -358,13 +355,33 @@ function loadData(){
   state.carts = JSON.parse(localStorage.getItem('ns_carts')||'{}');
   root.on('value', snap=>{
     const v = snap.val()||{};
-    // Hỗ trợ cả menu dạng object (từ mobile) và array (cũ)
     if(v.menu){
       state.menu = Array.isArray(v.menu) ? v.menu.map(cleanMenuItem) : Object.values(v.menu).map(cleanMenuItem);
     } else {
       state.menu = defaultMenu;
     }
-    state.orders = v.orders || {};
+    // --- FIX: Tự sửa đơn hàng cũ bị thiếu time ---
+    const rawOrders = v.orders || {};
+    state.orders = {};
+    Object.entries(rawOrders).forEach(([key, o])=>{
+      if(!o.time || isNaN(new Date(o.time).getTime())){
+        const match = o.id && o.id.match(/NS(\d{2})(\d{2})(\d{2})/);
+        if(match){
+          const yy = 2000+parseInt(match[1]); const mm=parseInt(match[2])-1; const dd=parseInt(match[3]);
+          o.time = new Date(yy, mm, dd, 12, 0, 0).toISOString();
+        } else {
+          o.time = new Date().toISOString();
+        }
+        // Tự động cập nhật lại Firebase
+        root.child('orders').child(key).update({time:o.time});
+      }
+      if(!o.date){
+        const d = new Date(o.time);
+        o.date = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        root.child('orders').child(key).update({date:o.date});
+      }
+      state.orders[key] = o;
+    });
     state.settings = v.settings || {tables:10, employees:['Chủ quán']};
     if(!v.menu) root.child('menu').set(JSON.parse(JSON.stringify(state.menu)));
     if(!v.settings) root.child('settings').set(state.settings);
@@ -403,7 +420,6 @@ function renderTables(){
 function renderCategories(){
   const wrap = document.getElementById('categoryPills');
   const cats = ['Trà Sữa','Trà Trái Cây','Yaourt','Latte','Ăn Vặt','Topping'];
-  // đảm bảo có category
   if(!cats.includes(state.selectedCategory)) state.selectedCategory = 'Trà Sữa';
   wrap.innerHTML = cats.map(c=>`<button data-c="${c}" class="px-5 py-2.5 rounded-2xl text-[15px] font-bold whitespace-nowrap transition-all ${c===state.selectedCategory?'bg-gradient-to-r from-[#d81b60] to-[#ff6b9d] text-white shadow-lg shadow-pink-200 scale-105':'bg-[#fff0f5] text-[#d81b60] hover:bg-[#ffe4ee]'}">${c}</button>`).join('');
   wrap.querySelectorAll('button').forEach(b=>b.onclick=()=>{ state.selectedCategory=b.dataset.c; renderCategories(); renderProducts(); });
@@ -432,7 +448,6 @@ function addToCart(p){
   const i = cart.findIndex(x=>x.name===p.name && x.price===p.price);
   if(i>-1) cart[i].qty++; else cart.push(cleanCartItem({...p, qty:1}));
   state.carts[state.selectedTable]=cart; saveCarts(); renderCart();
-  navigator.vibrate && navigator.vibrate(10);
 }
 
 function renderCart(){
@@ -475,15 +490,14 @@ function checkout(){
   const d = String(now.getDate()).padStart(2,'0');
   const dateStr = y + m + d;
   const prefix = 'NS' + dateStr + '-';
-  // đếm đơn hôm nay để reset số thứ tự
   const todayCount = Object.values(state.orders || {}).filter(o => o.id && o.id.startsWith(prefix)).length;
   const seq = String(todayCount + 1).padStart(3, '0');
   const id = prefix + seq;
-  const order = { id, table:state.selectedTable, items:cart.map(cleanCartItem), total, time:now.toISOString(), user:currentUser.name, status:'done' };
+  const order = { id, table:state.selectedTable, items:cart.map(cleanCartItem), total, time:now.toISOString(), date:getLocalDate(), timestamp:now.getTime(), user:currentUser.name, status:'done' };
   const clean = JSON.parse(JSON.stringify(order));
   root.child('orders').child(id).set(clean).then(()=>{
     delete state.carts[state.selectedTable]; saveCarts(); renderCart();
-    showSuccess(order); // không tự in nữa
+    showSuccess(order);
   });
 }
 
@@ -494,7 +508,6 @@ function showSuccess(o){
   document.getElementById('successItems').innerHTML = o.items.map(i=>`<div class="flex justify-between py-1"><span>${i.name} x${i.qty}</span><span class="font-semibold">${fmt(i.price*i.qty)}</span></div>`).join('');
   document.getElementById('printBtn').onclick = ()=>{ printBill(o); closeSuccess(); };
   const m = document.getElementById('successModal'); m.classList.remove('hidden'); m.classList.add('flex');
-  // không tự đóng nữa, để bà xem bill
 }
 function closeSuccess(){ const m=document.getElementById('successModal'); m.classList.add('hidden'); m.classList.remove('flex'); }
 window.closeSuccess = closeSuccess;
@@ -524,11 +537,11 @@ function renderOrders(){
       <div class="min-w-0 flex-1">
         <div class="flex items-center gap-2"><span class="font-bold text-[#d81b60]">${o.id}</span><span class="px-2.5 py-0.5 bg-[#ffe4ee] text-[#d81b60] rounded-full text-xs font-semibold">${o.table}</span></div>
         <div class="text-xs text-gray-500 mt-1">${new Date(o.time).toLocaleString('vi-VN')} • ${o.user||''}</div>
-        <div class="text-[13px] text-gray-600 mt1 truncate">${o.items.map(i=>`${i.name}×${i.qty}`).join(' • ')}</div>
+        <div class="text-[13px] text-gray-600 mt-1 truncate">${o.items.map(i=>`${i.name}×${i.qty}`).join(' • ')}</div>
       </div>
       <div class="text-right ml-4">
         <div class="font-extrabold text-lg text-gray-900">${fmt(o.total)}</div>
-        <button data-print="${o.id}" class="mt1 text-xs px3 py1.5 bg-gray-900 text-white rounded-lg opacity-0 group-hover:opacity-100 transition">In lại</button>
+        <button data-print="${o.id}" class="mt-1 text-xs px-3 py-1.5 bg-gray-900 text-white rounded-lg opacity-0 group-hover:opacity-100 transition">In lại</button>
       </div>
     </div>`).join('') || '<div class="text-center py-16 text-gray-400">Chưa có đơn hàng nào</div>';
   wrap.querySelectorAll('[data-print]').forEach(b=>b.onclick=()=>{ const o=state.orders[b.dataset.print]; if(o) printBill(o); });
@@ -542,7 +555,7 @@ function renderMenuEditor(){
       <td class="py-2.5"><input data-i="${i}" data-f="name" value="${m.name}" class="w-full py-2 px-3 bg-[#fff8fb] rounded-xl outline-none focus:ring-2 focus:ring-pink-200 font-medium"></td>
       <td class="py-2.5"><input data-i="${i}" data-f="price" type="number" value="${m.price}" class="w-28 py-2 px-3 bg-[#fff8fb] rounded-xl outline-none focus:ring-2 focus:ring-pink-200"></td>
       <td class="py-2.5"><input data-i="${i}" data-f="category" value="${m.category}" class="w-full py-2 px-3 bg-[#fff8fb] rounded-xl outline-none focus:ring-2 focus:ring-pink-200"></td>
-      <td class="py-2.5 text-right"><button data-del="${i}" class="px-3 py1.5 text-red-500 hover:bg-red-50 rounded-xl font-medium">Xóa</button></td>
+      <td class="py-2.5 text-right"><button data-del="${i}" class="px-3 py-1.5 text-red-500 hover:bg-red-50 rounded-xl font-medium">Xóa</button></td>
     </tr>`).join('');
   tbody.querySelectorAll('input').forEach(inp=>inp.onchange=e=>{ const i=+e.target.dataset.i; const f=e.target.dataset.f; state.menu[i][f]= f==='price'? parseInt(e.target.value)||0 : e.target.value; });
   tbody.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{ if(confirm('Xóa món này?')){ state.menu.splice(+b.dataset.del,1); saveMenu(true); } });
@@ -562,8 +575,8 @@ function saveMenu(silent){ const cleaned=state.menu.map(cleanMenuItem); root.chi
 
 function renderRevenue(){
   const orders = Object.values(state.orders);
-  const todayStr = new Date().toDateString();
-  const todayOrders = orders.filter(o=>new Date(o.time).toDateString()===todayStr);
+  const todayStr = getLocalDate();
+  const todayOrders = orders.filter(o=> (o.date||new Date(o.time).toISOString().split('T')[0])===todayStr);
   document.getElementById('todayTotal').textContent = fmt(todayOrders.reduce((s,o)=>s+o.total,0));
   document.getElementById('todayOrders').textContent = todayOrders.length;
   const now=new Date(); const monthTotal=orders.filter(o=>{const d=new Date(o.time); return d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear();}).reduce((s,o)=>s+o.total,0);
@@ -574,7 +587,7 @@ function renderRevenue(){
   const ctx=document.getElementById('revenueChart'); if(!ctx) return;
   const days=[...Array(7)].map((_,i)=>{const d=new Date(); d.setDate(d.getDate()-6+i); return d;});
   const labels=days.map(d=>d.toLocaleDateString('vi-VN',{weekday:'short'}));
-  const data=days.map(d=> orders.filter(o=>new Date(o.time).toDateString()===d.toDateString()).reduce((s,o)=>s+o.total,0));
+  const data=days.map(d=> { const ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; return orders.filter(o=> (o.date||'')===ds).reduce((s,o)=>s+o.total,0); });
   if(revenueChart) revenueChart.destroy();
   revenueChart=new Chart(ctx,{type:'bar',data:{labels,datasets:[{data,backgroundColor:'#ff6b9d',borderRadius:12,barThickness:36}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'#ffe4ee'},ticks:{callback:v=>v>=1000000?(v/1000000)+'tr':(v/1000)+'k'}},x:{grid:{display:false}}}}});
 }
