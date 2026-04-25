@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#d81b60">
-<title> Trà Sữa Như Say POS Pro</title>
+<title>Trà Sữa Như Say POS Pro</title>
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
@@ -96,7 +96,7 @@ body{font-family:'Be Vietnam Pro',system-ui;background:#fff7fb;overscroll-behavi
 </div>
 
 <!-- Success -->
-<div id="ok" class="fixed inset-0 bg-black/60 hidden place-items-center z-50 p-6">
+<div id="ok" class="fixed inset-0 bg-black/60 hidden grid place-items-center z-50 p-6">
   <div class="bg-white rounded-3xl p-6 w-full max-w-[320px] text-center">
     <div class="w-16 h-16 mx-auto rounded-full bg-[#d81b60] grid place-items-center text-white text-3xl mb-3">✓</div>
     <div class="font-bold text-lg">Thành công</div>
@@ -130,8 +130,8 @@ function init(){
   bind()
 }
 function renderTables(){const w=$('tables');w.innerHTML='';(state.tables||['Mang về','Bàn 1','Bàn 2','Bàn 3','Bàn 4','Bàn 5','Bàn 6','Bàn 7','Bàn 8','Bàn 9','Bàn 10']).forEach(t=>{const b=document.createElement('button');b.className='pill px-3 h-8 rounded-full text-[13px] whitespace-nowrap '+(t===state.table?'pill-active bg-white/90':'bg-white/20 text-white');b.textContent=t;b.onclick=()=>{state.table=t;$('cartTable').textContent=t;renderTables()};w.appendChild(b)})}
-function updateCats(){state.cats=['Tất cả',...new Set(state.products.map(p=>p.category))];const c=$('cats');c.innerHTML='';state.cats.forEach(x=>{const b=document.createElement('button');b.className='pill px-3.5 h-8 rounded-full text-[13px] '+(x===state.cat?'pill-active':'bg-zinc-100');b.textContent=x;b.onclick=()=>{state.cat=x;updateCats();renderGrid()};c.appendChild(b)})}
-function renderGrid(){const g=$('grid');const kw=state.search;const list=state.products.filter(p=>(state.cat==='Tất cả'||p.category===state.cat)&&p.name.toLowerCase().includes(kw));g.innerHTML='';$('empty').style.display=list.length?'none':'block';list.forEach(p=>{const el=document.createElement('button');el.className='bg-white rounded-2xl p-3 text-left shadow-soft active:scale-95 border';el.innerHTML=`<div class="flex gap-3"><div class="w-14 h-14 rounded-xl bg-pink-50 grid place-items-center text-[26px]">${p.icon}</div><div class="flex-1"><div class="font-bold leading-tight">${p.name}</div><div class="mt-2 flex justify-between items-center"><span class="text-[#d81b60] font-extrabold">${fmt(p.price)}</span><span class="w-7 h-7 rounded-lg bg-zinc-900 text-white grid place-items-center">+</span></div></div></div>`;el.onclick=()=>{const i=state.cart.findIndex(c=>c.id===p.id);if(i>-1)state.cart[i].qty++;else state.cart.push({...p,qty:1});updateCart()};g.appendChild(el)})}
+function updateCats(){state.cats=[...new Set(state.products.map(p=>p.category))];if(!state.cat||!state.cats.includes(state.cat))state.cat=state.cats[0]||'';const c=$('cats');c.innerHTML='';state.cats.forEach(x=>{const b=document.createElement('button');b.className='pill px-3.5 h-8 rounded-full text-[13px] '+(x===state.cat?'pill-active':'bg-zinc-100');b.textContent=x;b.onclick=()=>{state.cat=x;updateCats();renderGrid()};c.appendChild(b)})}
+function renderGrid(){const g=$('grid');const kw=state.search;const list=state.products.filter(p=>p.category===state.cat&&p.name.toLowerCase().includes(kw));g.innerHTML='';$('empty').style.display=list.length?'none':'block';list.forEach(p=>{const el=document.createElement('button');el.className='bg-white rounded-2xl p-3 text-left shadow-soft active:scale-95 border';el.innerHTML=`<div class="flex gap-3"><div class="w-14 h-14 rounded-xl bg-pink-50 grid place-items-center text-[26px]">${p.icon}</div><div class="flex-1"><div class="font-bold leading-tight">${p.name}</div><div class="mt-2 flex justify-between items-center"><span class="text-[#d81b60] font-extrabold">${fmt(p.price)}</span><span class="w-7 h-7 rounded-lg bg-zinc-900 text-white grid place-items-center">+</span></div></div></div>`;el.onclick=()=>{const i=state.cart.findIndex(c=>c.id===p.id);if(i>-1)state.cart[i].qty++;else state.cart.push({...p,qty:1});updateCart()};g.appendChild(el)})}
 function updateCart(){const total=state.cart.reduce((s,i)=>s+i.price*i.qty,0);$('cartTotal').textContent=fmt(total);$('cartBar').style.display=total?'block':'none';}
 $('search').oninput=e=>{state.search=e.target.value.toLowerCase();renderGrid()};
 
@@ -139,7 +139,7 @@ function bind(){
   document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('section').forEach(s=>s.classList.add('hidden'));$('v-'+b.dataset.v).classList.remove('hidden');document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('text-[#d81b60]',x===b));document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('text-zinc-400',x!==b))});
   $('btnPay').onclick=checkout;
   $('okClose').onclick=()=>$('ok').classList.add('hidden');
-  $('okPrint').onclick=()=>{if(state.last)printBill(state.last);$('ok').classList.add('hidden')}
+  $('okPrint').onclick=()=>{if(state.last){printBill(state.last);setTimeout(()=>$('ok').classList.add('hidden'),500)}}
 }
 function checkout(){
   if(!state.cart.length)return;
@@ -147,7 +147,7 @@ function checkout(){
   const order={id,table:state.table,items:state.cart,total:state.cart.reduce((s,i)=>s+i.price*i.qty,0),time:now.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'}),date:now.toISOString().slice(0,10),timestamp:now.getTime()};
   if(db)db.ref('nhusay-pos/orders/'+id).set(order);
   state.last=order;state.cart=[];updateCart();
-  $('okId').textContent=order.id+' • '+order.table;$('okTotal').textContent=fmt(order.total);$('ok').classList.remove('hidden');$('ok').style.display='grid';
+  $('okId').textContent=order.id+' • '+order.table;$('okTotal').textContent=fmt(order.total);$('ok').classList.remove('hidden');
   renderDon();renderDT();
 }
 function renderDon(){const today=new Date().toISOString().slice(0,10);const list=state.orders.filter(o=>o.date===today);$('countDon').textContent=list.length;$('listDon').innerHTML=list.map(o=>`<div class="bg-white rounded-xl p-3 shadow-soft flex justify-between"><div><div class="font-bold text-sm">${o.id}</div><div class="text-xs text-zinc-500">${o.table} • ${o.time}</div></div><div class="text-right"><div class="font-bold text-[#d81b60]">${fmt(o.total)}</div><button onclick='printBill(${JSON.stringify(o).replace(/'/g,"&#39;")})' class="text-[11px] underline">In</button></div></div>`).join('')||'<div class="text-center text-zinc-400 py-10">Chưa có đơn</div>'}
@@ -156,8 +156,13 @@ function renderDT(){const today=new Date().toISOString().slice(0,10);const list=
 // IN BILL ĐẸP - có logo + SĐT
 function printBill(o){
   if(typeof o==='string')o=JSON.parse(o.replace(/&#39;/g,"'"));
-  const html=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${o.id}</title><style>@page{size:80mm auto;margin:4mm}body{font-family:Arial;width:72mm;font-size:13px;color:#000}h1{margin:0;text-align:center;font-size:22px;color:#d81b60} .c{text-align:center}.s{font-size:11px;color:#666}.line{border-top:1px dashed #000;margin:6px 0}.r{display:flex;justify-content:space-between;margin:3px 0}.b{font-weight:700}.t{font-size:18px;margin-top:4px}.foot{margin-top:8px;text-align:center;font-size:11px}</style></head><body><h1>🧋 TRÀ SỮA NHƯ SAY</h1><div class="c s">Trà sữa đậm vị </p> Hương vị " Như Say " lòng bạn ! </p> </p> 0347.047.141 - 0523.83.36.83 </p></div><div class="c s">Ngã 3 cơ xưởng, Xuân Quế, Đồng Nai </div><div class="line"></div><div class="r"><span>Mã:</span><b>${o.id}</b></div><div class="r"><span>Bàn:</span><b>${o.table}</b></div><div class="r"><span>Giờ:</span><span>${o.time} ${o.date}</span></div><div class="line"></div>${o.items.map(i=>`<div class="r"><span>${i.name} x${i.qty}</span><span>${fmt(i.price*i.qty)}</span></div>`).join('')}<div class="line"></div><div class="r t b"><span>TỔNG CỘNG</span><span>${fmt(o.total)}</span></div><div class="line"></div><div class="foot">Cảm ơn quý khách!<br> Hẹn gặp lại 💖</div><script>onload=()=>{print();setTimeout(close,400)}<\/script></body></html>`;
-  const w=open('','_blank');w.document.write(html);w.document.close();
+  const html=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${o.id}</title><style>@page{size:80mm auto;margin:4mm}body{font-family:Arial;width:72mm;font-size:13px;color:#000;margin:0;padding:4mm}h1{margin:0;text-align:center;font-size:22px;color:#d81b60}.c{text-align:center}.s{font-size:11px;color:#666}.line{border-top:1px dashed #000;margin:6px 0}.r{display:flex;justify-content:space-between;margin:3px 0}.b{font-weight:700}.t{font-size:18px;margin-top:4px}.foot{margin-top:8px;text-align:center;font-size:11px}</style></head><body><h1>🧋TRÀ SỮA NHƯ SAY</h1><div class="c s">Trà sữa đậm vị </p> Hương vị "Như Say" lòng bạn !!! </p> </p> 0347.047.141 - 0523.83.36.83 </p> </div><div class="c s">Ngã 3 cơ xưởng, Xuân Quế, Đồng Nai</div><div class="line"></div><div class="r"><span>Mã:</span><b>${o.id}</b></div><div class="r"><span>Bàn:</span><b>${o.table}</b></div><div class="r"><span>Giờ:</span><span>${o.time} ${o.date}</span></div><div class="line"></div>${o.items.map(i=>`<div class="r"><span>${i.name} x${i.qty}</span><span>${fmt(i.price*i.qty)}</span></div>`).join('')}<div class="line"></div><div class="r t b"><span>TỔNG CỘNG</span><span>${fmt(o.total)}</span></div><div class="line"></div><div class="foot">Cảm ơn quý khách!<br>Hẹn gặp lại 💖 </p> Wifi: Trà sữa Như Say </p> </p> Mật khẩu: 888888888 </p> </div></body></html>`;
+  const ifr=document.createElement('iframe');
+  ifr.style.position='fixed';ifr.style.width='0';ifr.style.height='0';ifr.style.border='0';ifr.style.right='0';ifr.style.bottom='0';
+  document.body.appendChild(ifr);
+  const doc=ifr.contentDocument||ifr.contentWindow.document;
+  doc.open();doc.write(html);doc.close();
+  setTimeout(()=>{ifr.contentWindow.focus();ifr.contentWindow.print();setTimeout(()=>document.body.removeChild(ifr),1000)},300);
 }
 window.printBill=printBill;
 </script>
