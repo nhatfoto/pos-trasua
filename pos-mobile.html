@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#d81b60">
-<title>Như Say POS Pro</title>
+<title> Trà Sữa Như Say POS </title>
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
@@ -25,7 +25,7 @@ body{font-family:'Be Vietnam Pro',system-ui;background:#fff7fb;overscroll-behavi
   <div class="w-full max-w-[350px] bg-white rounded-[30px] p-8 shadow-2xl text-center">
     <div class="text-[52px] mb-2">🧋</div>
     <h1 class="text-[28px] font-extrabold">Trà Sữa Như Say</h1>
-    <p class="text-zinc-500 mb-6">POS Mobile</p>
+    <p class="text-zinc-500 mb-6">0347.047.141</p>
     <input id="pw" type="password" inputmode="numeric" placeholder="••••••" class="w-full h-[56px] rounded-2xl bg-zinc-100 text-center text-[24px] tracking-[0.3em] font-bold outline-none focus:ring-4 focus:ring-pink-200">
     <button id="btnLogin" class="w-full h-[52px] mt-4 rounded-2xl bg-[#d81b60] text-white font-bold text-[17px] active:scale-95">Đăng nhập</button>
     <p id="err" class="text-red-500 text-sm h-5 mt-2"></p>
@@ -156,7 +156,7 @@ function renderDT(){const today=new Date().toISOString().slice(0,10);const list=
 // IN BILL ĐẸP - có logo + SĐT
 function printBill(o){
   if(typeof o==='string')o=JSON.parse(o.replace(/&#39;/g,"'"));
-  const html=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${o.id}</title><style>@page{size:80mm auto;margin:4mm}body{font-family:Arial;width:72mm;font-size:13px;color:#000}h1{margin:0;text-align:center;font-size:22px;color:#d81b60} .c{text-align:center}.s{font-size:11px;color:#666}.line{border-top:1px dashed #000;margin:6px 0}.r{display:flex;justify-content:space-between;margin:3px 0}.b{font-weight:700}.t{font-size:18px;margin-top:4px}.foot{margin-top:8px;text-align:center;font-size:11px}</style></head><body><h1>🧋 NHƯ SAY</h1><div class="c s">Trà sữa đậm vị - 0347.047.141</div><div class="c s">Xã Cẩm Tâm, Đồng Nai</div><div class="line"></div><div class="r"><span>Mã:</span><b>${o.id}</b></div><div class="r"><span>Bàn:</span><b>${o.table}</b></div><div class="r"><span>Giờ:</span><span>${o.time} ${o.date}</span></div><div class="line"></div>${o.items.map(i=>`<div class="r"><span>${i.name} x${i.qty}</span><span>${fmt(i.price*i.qty)}</span></div>`).join('')}<div class="line"></div><div class="r t b"><span>TỔNG CỘNG</span><span>${fmt(o.total)}</span></div><div class="line"></div><div class="foot">Cảm ơn quý khách!<br> Hẹn gặp lại 💖</div><script>onload=()=>{print();setTimeout(close,400)}<\/script></body></html>`;
+  const html=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${o.id}</title><style>@page{size:80mm auto;margin:4mm}body{font-family:Arial;width:72mm;font-size:13px;color:#000}h1{margin:0;text-align:center;font-size:22px;color:#d81b60} .c{text-align:center}.s{font-size:11px;color:#666}.line{border-top:1px dashed #000;margin:6px 0}.r{display:flex;justify-content:space-between;margin:3px 0}.b{font-weight:700}.t{font-size:18px;margin-top:4px}.foot{margin-top:8px;text-align:center;font-size:11px}</style></head><body><h1>🧋TRÀ SỮA NHƯ SAY</h1><div class="c s">Trà sữa đậm vị - hương vị " Như Say " lòng bạn </p> 0347.047.141 </p> </div><div class="c s">Xã Cẩm Tâm, Đồng Nai</div><div class="line"></div><div class="r"><span>Mã:</span><b>${o.id}</b></div><div class="r"><span>Bàn:</span><b>${o.table}</b></div><div class="r"><span>Giờ:</span><span>${o.time} ${o.date}</span></div><div class="line"></div>${o.items.map(i=>`<div class="r"><span>${i.name} x${i.qty}</span><span>${fmt(i.price*i.qty)}</span></div>`).join('')}<div class="line"></div><div class="r t b"><span>TỔNG CỘNG</span><span>${fmt(o.total)}</span></div><div class="line"></div><div class="foot">Cảm ơn quý khách!<br> Hẹn gặp lại 💖</div><script>onload=()=>{print();setTimeout(close,400)}<\/script></body></html>`;
   const w=open('','_blank');w.document.write(html);w.document.close();
 }
 window.printBill=printBill;
