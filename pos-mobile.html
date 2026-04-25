@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#d81b60">
+<title>Trà Sữa Như Say - POS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+<style>
+  *{ -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+  html{ -webkit-text-size-adjust:100%; }
+  body{ font-family:'Be Vietnam Pro',system-ui,-apple-system,sans-serif; overscroll-behavior-y:contain; background:#f9fafb; }
+  input, select, textarea, button{ font-size:18px; }
+  .no-scrollbar{ -ms-overflow-style:none; scrollbar-width:none; }
+  .no-scrollbar::-webkit-scrollbar{ display:none; }
+  .safe-bottom{ padding-bottom: max(0.5rem, env(safe-area-inset-bottom)); }
+  button{ min-height:44px; min-width:44px; }
+  .touch-44{ min-height:44px; min-width:44px; }
+</style>
+</head>
+<body class="bg-gray-50 text-gray-900 select-none">
+
+<!-- LOGIN -->
+<div id="login" class="fixed inset-0 z-[200] flex items-center justify-center p-6" style="background:linear-gradient(135deg,#d81b60 0%,#ff6b9d 100%)">
+  <div class="w-full max-w-[340px] bg-white rounded-[28px] shadow-2xl p-8 text-center">
+    <div class="w-20 h-20 mx-auto rounded-2xl flex items-center justify-center mb-4 shadow-lg" style="background:linear-gradient(135deg,#d81b60,#ff6b9d)">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+        <path d="M8 7V5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M7 7h10l1 9a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2l1-9z"/>
+        <path d="M10 11v4M14 11v4"/>
+      </svg>
+    </div>
+    <h1 class="text-[26px] font-bold leading-tight">Trà Sữa Như Say</h1>
+    <p class="text-gray-500 mt-1 mb-6">Hệ thống bán hàng</p>
+    <form id="login-form" class="space-y-4">
+      <input id="password" type="password" inputmode="numeric" pattern="[0-9]*" placeholder="Nhập mật khẩu" class="w-full h-[56px] px-4 rounded-2xl bg-gray-100 text-center tracking-[0.3em] text-[18px] font-medium outline-none focus:ring-2 focus:ring-pink-500" autocomplete="off" autocapitalize="off">
+      <button type="submit" class="w-full h-[56px] rounded-2xl text-white font-bold text-[17px] active:scale-[0.98] transition shadow-lg" style="background:linear-gradient(135deg,#d81b60,#ff6b9d)">Đăng nhập</button>
+      <p id="login-error" class="text-red-500 text-[14px] h-5"></p>
+    </form>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" class="hidden h-[100dvh] flex flex-col max-w-[480px] mx-auto bg-gray-50 relative">
+  <!-- TOP BAR -->
+  <header class="shrink-0 text-white shadow-lg relative z-30" style="background:linear-gradient(135deg,#d81b60,#ff6b9d); padding-top:env(safe-area-inset-top)">
+    <div class="flex items-center gap-3 px-4 pt-3 pb-2">
+      <div class="w-10 h-10 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+          <path d="M8 7V5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M7 7h10l1 9a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2l1-9z"/>
+        </svg>
+      </div>
+      <div>
+        <h1 class="text-[20px] font-bold leading-none">Trà Sữa Như Say</h1>
+        <p class="text-[12px] text-white/80">POS Mobile</p>
+      </div>
+    <div id="table-scroll" class="flex gap-2 overflow-x-auto no-scrollbar px-3 pb-3 pt-1"></div>
+  </header>
+
+  <!-- SEARCH & CATS -->
+  <div class="bg-white sticky top-0 z-20 border-b border-gray-100">
+    <div class="p-3 pb-2">
+      <div class="relative">
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <input id="search" type="search" placeholder="Tìm trà sữa, topping..." class="w-full h-11 pl-10 pr-4 rounded-xl bg-gray-100 text-[16px] outline-none focus:ring-2 focus:ring-pink-500 focus:bg-white transition" />
+      </div>
+    </div>
+    <div id="category-scroll" class="flex gap-2 overflow-x-auto no-scrollbar px-3 pb-3"></div>
+  </div>
+
+  <!-- MAIN -->
+  <main class="flex-1 overflow-y-auto">
+    <section id="tab-ban-hang" class="p-3 pb-[180px]">
+      <div id="product-grid" class="grid grid-cols-2 gap-3"></div>
+    </section>
+    
+    <section id="tab-don" class="hidden p-3 pb-[120px]">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-lg font-bold">Đơn hàng hôm nay</h2>
+        <span id="orders-count" class="text-sm text-gray-500"></span>
+      </div>
+      <div id="orders-list" class="space-y-2"></div>
+    </section>
+    
+    <section id="tab-menu" class="hidden p-3 pb-[120px]">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-lg font-bold">Quản lý Menu</h2>
+        <button id="btn-add-product" class="h-9 px-3 rounded-xl text-white text-sm font-medium" style="background:linear-gradient(135deg,#d81b60,#ff6b9d)">+ Thêm món</button>
+      </div>
+      <div id="menu-list" class="space-y-2"></div>
+    </section>
+    
+    <section id="tab-doanh-thu" class="hidden p-3 pb-[120px]">
+      <h2 class="text-lg font-bold mb-3">Doanh thu hôm nay</h2>
+      <div class="grid grid-cols-2 gap-3 mb-4">
+        <div class="bg-white rounded-2xl p-4 shadow-sm">
+          <div class="text-xs text-gray-500">Tổng bán</div>
+          <div id="rev-total" class="text-2xl font-bold text-pink-600 mt-1">0đ</div>
+        </div>
+        <div class="bg-white rounded-2xl p-4 shadow-sm">
+          <div class="text-xs text-gray-500">Số đơn</div>
+          <div id="rev-count" class="text-2xl font-bold mt-1">0</div>
+        </div>
+      <div class="bg-white rounded-2xl p-4 shadow-sm">
+        <div class="text-sm font-semibold mb-2">Món bán chạy</div>
+        <div id="rev-top" class="space-y-1.5 text-sm"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- CART BAR -->
+  <div id="cart-bar" class="fixed left-0 right-0 z-30 max-w-[480px] mx-auto" style="bottom:72px; display:none">
+    <div class="mx-3 mb-2">
+      <div id="cart-bar-inner" class="bg-white rounded-[20px] shadow-[0_8px_24px_rgba(0,0,0,0.15)] border border-pink-100 p-3 flex items-center justify-between active:scale-[0.98] transition">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold shadow-md relative" style="background:linear-gradient(135deg,#d81b60,#ff6b9d)">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M9 8h-3l4-4 4 4h-3v8h-2z"/><circle cx="8.5" cy="19.5" r="1.5"/><circle cx="17.5" cy="19.5" r="1.5"/></svg>
+            <span id="cart-count" class="absolute -top-1.5 -right-1.5 bg-yellow-400 text-[11px] text-gray-900 font-bold w-5 h-5 rounded-full flex items-center justify-center">0</span>
+          </div>
+          <div>
+            <div class="text-[12px] text-gray-500 leading-none">Giỏ hàng</div>
+            <div id="cart-total" class="text-[18px] font-bold text-pink-600 leading-tight">0đ</div>
+          </div>
+        </div>
+        <button id="btn-checkout" class="h-12 px-6 rounded-xl text-white font-bold text-[15px] shadow-md active:scale-95" style="background:linear-gradient(135deg,#d81b60,#ff6b9d)">Thanh toán</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM TABS -->
+  <nav class="fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-lg border-t border-gray-200 max-w-[480px] mx-auto safe-bottom">
+    <div class="grid grid-cols-4 h-[72px]">
+      <button data-tab="ban-hang" class="tab-btn flex flex-col items-center justify-center gap-1 text-[11px] font-medium text-pink-600">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+        <span>Bán hàng</span>
+      </button>
+      <button data-tab="don" class="tab-btn flex flex-col items-center justify-center gap-1 text-[11px] font-medium text-gray-400">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+        <span>Đơn</span>
+      </button>
+      <button data-tab="menu" class="tab-btn flex flex-col items-center justify-center gap-1 text-[11px] font-medium text-gray-400">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+        <span>Menu</span>
+      </button>
+      <button data-tab="doanh-thu" class="tab-btn flex flex-col items-center justify-center gap-1 text-[11px] font-medium text-gray-400">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        <span>Doanh thu</span>
+      </button>
+    </div>
+  </nav>
+</div>
+
+<!-- CART SHEET -->
+<div id="cart-sheet" class="fixed inset-0 z-50 hidden">
+  <div id="cart-backdrop" class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+  <div id="cart-panel" class="absolute bottom-0 left-0 right-0 bg-white rounded-t-[28px] max-h-[85vh] flex flex-col translate-y-full transition-transform duration-300 max-w-[480px] mx-auto shadow-2xl">
+    <div class="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mt-3 shrink-0"></div>
+    <div class="flex items-center justify-between px-4 py-3 border-b shrink-0">
+      <h3 class="text-[18px] font-bold">Giỏ hàng • <span id="cart-table-name" class="text-pink-600">Mang về</span></h3>
+      <button id="cart-close" class="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center active:scale-90">✕</button>
+    </div>
+    <div id="cart-items" class="flex-1 overflow-y-auto p-3 space-y-2"></div>
+    <div class="p-4 border-t bg-gray-50 safe-bottom shrink-0">
+      <div class="flex justify-between items-center mb-3">
+        <span class="text-[15px] font-medium text-gray-600">Tổng cộng</span>
+        <span id="cart-sheet-total" class="text-[24px] font-bold text-pink-600">0đ</span>
+      </div>
+      <button id="cart-checkout" class="w-full h-[52px] rounded-2xl text-white font-bold text-[17px] shadow-lg active:scale-[0.98]" style="background:linear-gradient(135deg,#d81b60,#ff6b9d)">Xác nhận thanh toán</button>
+    </div>
+  </div>
+</div>
+
+<!-- SUCCESS -->
+<div id="success" class="fixed inset-0 z-[60] hidden items-center justify-center p-6 bg-black/60 backdrop-blur-sm">
+  <div class="bg-white rounded-[28px] p-7 w-full max-w-[320px] text-center shadow-2xl">
+    <div class="w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-4" style="background:linear-gradient(135deg,#d81b60,#ff6b9d)">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+    </div>
+    <h3 class="text-[22px] font-bold">Thành công!</h3>
+    <p id="success-id" class="text-gray-500 mt-1 text-[14px]"></p>
+    <p id="success-total" class="text-[28px] font-bold text-pink-600 mt-2"></p>
+    <div class="grid grid-cols-2 gap-3 mt-6">
+      <button id="success-done" class="h-12 rounded-xl bg-gray-100 font-semibold text-[15px] active:scale-95">Xong</button>
+      <button id="success-print" class="h-12 rounded-xl text-white font-semibold text-[15px] shadow-md active:scale-95" style="background:linear-gradient(135deg,#d81b60,#ff6b9d)">In bill</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const state = {
+  table: 'Mang về',
+  cart: [],
+  products: [],
+  categories: ['Tất cả'],
+  orders: [],
+  search: '',
+  activeCategory: 'Tất cả',
+  tables: ['Mang về','Bàn 1','Bàn 2','Bàn 3','Bàn 4','Bàn 5','Bàn 6','Bàn 7','Bàn 8','Bàn 9','Bàn 10'],
+  currentTab: 'ban-hang',
+  lastOrder: null
+};
+
+const SAMPLE_MENU = [
+  {id:'ts01', name:'Trà Sữa Truyền Thống', price:25000, category:'Trà Sữa', active:true},
+  {id:'ts02', name:'Trà Sữa Thái Xanh', price:28000, category:'Trà Sữa', active:true},
+  {id:'ts03', name:'Hồng Trà Sữa', price:27000, category:'Trà Sữa', active:true},
+  {id:'ts04', name:'Sữa Tươi TC Đường Đen', price:32000, category:'Trà Sữa', active:true},
+  {id:'ts05', name:'Trà Sữa Khoai Môn', price:29000, category:'Trà Sữa', active:true},
+  {id:'tt01', name:'Trà Đào Cam Sả', price:26000, category:'Trà Trái Cây', active:true},
+  {id:'tt02', name:'Trà Vải Lài', price:26000, category:'Trà Trái Cây', active:true},
+  {id:'tt03', name:'Trà Chanh Dây', price:24000, category:'Trà Trái Cây', active:true},
+  {id:'tt04', name:'Trà Dâu Tằm', price:27000, category:'Trà Trái Cây', active:true},
+  {id:'tp01', name:'Trân Châu Đen', price:5000, category:'Topping', active:true},
+  {id:'tp02', name:'Thạch Phô Mai', price:7000, category:'Topping', active:true},
+  {id:'tp03', name:'Pudding Trứng', price:7000, category:'Topping', active:true},
+];
+
+// Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyC9OeCu6CF6Q-7yVDAS1V8SNfxu7bO4QXU",
+  authDomain: "nhusay-pos.firebaseapp.com",
+  databaseURL: "https://nhusay-pos-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "nhusay-pos",
+  storageBucket: "nhusay-pos.appspot.com",
+  messagingSenderId: "123456789012",
+  appId: "1:123456789012:web:abcdef1234567890"
+};
+let db = null;
+try {
+  firebase.initializeApp(firebaseConfig);
+  db = firebase.database();
+} catch(e){ console.warn('Firebase init failed, using local mode'); }
+
+function formatPrice(n){ return new Intl.NumberFormat('vi-VN').format(n)+'đ'; }
+
+function init(){
+  renderTables();
+  loadData();
+  bindEvents();
+  $('cart-table-name').textContent = state.table;
+}
+
+function loadData(){
+  if(db){
+    db.ref('ns/menu').on('value', snap => {
+      const val = snap.val();
+      state.products = val ? Object.values(val) : SAMPLE_MENU;
+      if(!val){ SAMPLE_MENU.forEach(p => db.ref('ns/menu/'+p.id).set(p)); }
+      updateCategories(); renderProducts(); renderMenuList();
+    });
+    db.ref('ns/orders').limitToLast(200).on('value', snap => {
+      const val = snap.val();
+      state.orders = val ? Object.values(val).sort((a,b)=>b.timestamp-a.timestamp) : [];
+      renderOrders(); renderRevenue();
+    });
+    db.ref('ns/settings/tables').on('value', snap => {
+      if(snap.exists()){ state.tables = snap.val(); renderTables(); }
+    });
+  } else {
+    state.products = SAMPLE_MENU;
+    updateCategories(); renderProducts(); renderMenuList(); renderOrders(); renderRevenue();
+  }
+}
+
+function updateCategories(){
+  const cats = ['Tất cả', ...new Set(state.products.filter(p=>p.active).map(p=>p.category))];
+  state.categories = cats;
+  renderCategories();
+}
+
+function renderTables(){
+  const wrap = $('table-scroll'); wrap.innerHTML='';
+  state.tables.forEach(t=>{
+    const btn = document.createElement('button');
+    const active = t===state.table;
+    btn.className = `px-4 h-9 rounded-full text-[14px] font-medium whitespace-nowrap border transition active:scale-95 ${active?'bg-white text-pink-600 border-white shadow-md':'bg-white/15 text-white border-white/30 backdrop-blur'}`;
+    btn.textContent = t;
+    btn.onclick = ()=>{ state.table=t; $('cart-table-name').textContent=t; renderTables(); };
+    wrap.appendChild(btn);
+  });
+}
+
+function renderCategories(){
+  const wrap = $('category-scroll'); wrap.innerHTML='';
+  state.categories.forEach(c=>{
+    const btn = document.createElement('button');
+    const active = c===state.activeCategory;
+    btn.className = `px-4 h-9 rounded-full text-[14px] font-medium whitespace-nowrap transition active:scale-95 ${active?'text-white shadow-md':'bg-gray-100 text-gray-700'}`;
+    if(active) btn.style.background = 'linear-gradient(135deg,#d81b60,#ff6b9d)';
+    btn.textContent = c;
+    btn.onclick = ()=>{ state.activeCategory=c; renderCategories(); renderProducts(); };
+    wrap.appendChild(btn);
+  });
+}
+
+function renderProducts(){
+  const grid = $('product-grid'); grid.innerHTML='';
+  const kw = state.search.toLowerCase();
+  const list = state.products.filter(p=>p.active && (state.activeCategory==='Tất cả' || p.category===state.activeCategory) && (!kw || p.name.toLowerCase().includes(kw)));
+  list.forEach(p=>{
+    const btn = document.createElement('button');
+    btn.className = 'bg-white rounded-[20px] p-3.5 shadow-sm border border-gray-100 text-left active:scale-[0.97] transition min-h-[90px] flex flex-col justify-between hover:shadow-md';
+    btn.innerHTML = `<div><div class="text-[13px] font-semibold leading-snug line-clamp-2 min-h-[36px]">${p.name}</div><div class="text-[11px] text-gray-400 mt-1">${p.category}</div></div><div class="flex items-center justify-between mt-2"><span class="text-[17px] font-bold" style="color:#d81b60">${formatPrice(p.price)}</span><span class="w-7 h-7 rounded-full flex items-center justify-center text-white" style="background:linear-gradient(135deg,#d81b60,#ff6b9d)">+</span></div>`;
+    btn.onclick = ()=> addToCart(p);
+    grid.appendChild(btn);
+  });
+  if(list.length===0){
+    grid.innerHTML = `<div class="col-span-2 text-center py-12 text-gray-400">Không tìm thấy món</div>`;
+  }
+}
+
+function addToCart(p){
+  const i = state.cart.findIndex(x=>x.id===p.id);
+  if(i>=0) state.cart[i].qty++;
+  else state.cart.push({id:p.id,name:p.name,price:p.price,qty:1});
+  updateCartUI();
+  // haptic
+  if(navigator.vibrate) navigator.vibrate(10);
+}
+
+function updateCartUI(){
+  const total = state.cart.reduce((s,i)=>s+i.price*i.qty,0);
+  const count = state.cart.reduce((s,i)=>s+i.qty,0);
+  $('cart-count').textContent = count;
+  $('cart-total').textContent = formatPrice(total);
+  $('cart-sheet-total').textContent = formatPrice(total);
+  $('cart-bar').style.display = count>0 ? 'block' : 'none';
+  renderCartItems();
+}
+
+function renderCartItems(){
+  const wrap = $('cart-items'); wrap.innerHTML='';
+  if(state.cart.length===0){
+    wrap.innerHTML = `<div class="text-center py-16 text-gray-400">Chưa có món nào</div>`;
+    return;
+  }
+  state.cart.forEach((item,idx)=>{
+    const div = document.createElement('div');
+    div.className = 'flex items-center gap-3 bg-gray-50 rounded-2xl p-3';
+    div.innerHTML = `<div class="flex-1"><div class="font-medium text-[15px]">${item.name}</div><div class="text-pink-600 font-bold text-[15px]">${formatPrice(item.price)}</div></div><div class="flex items-center gap-2"><button data-idx="${idx}" data-act="dec" class="w-11 h-11 rounded-xl bg-white border text-[20px] font-medium active:scale-90">−</button><span class="w-8 text-center font-bold">${item.qty}</span><button data-idx="${idx}" data-act="inc" class="w-11 h-11 rounded-xl text-white text-[20px] font-medium active:scale-90" style="background:linear-gradient(135deg,#d81b60,#ff6b9d)">+</button></div>`;
+    wrap.appendChild(div);
+  });
+  wrap.querySelectorAll('button').forEach(b=>{
+    b.onclick = ()=>{
+      const idx = +b.dataset.idx; const act = b.dataset.act;
+      if(act==='inc') state.cart[idx].qty++;
+      else { state.cart[idx].qty--; if(state.cart[idx].qty<=0) state.cart.splice(idx,1); }
+      updateCartUI();
+    };
+  });
+}
+
+function openCart(){ $('cart-sheet').classList.remove('hidden'); setTimeout(()=>$('cart-panel').classList.remove('translate-y-full'),10); }
+function closeCart(){ $('cart-panel').classList.add('translate-y-full'); setTimeout(()=>$('cart-sheet').classList.add('hidden'),300); }
+
+function generateOrderId(){
+  const d = new Date();
+  const yymmdd = d.getFullYear().toString().slice(-2) + String(d.getMonth()+1).padStart(2,'0') + String(d.getDate()).padStart(2,'0');
+  const prefix = 'NS'+yymmdd+'-';
+  const todayOrders = state.orders.filter(o=>o.id && o.id.startsWith(prefix));
+  const num = todayOrders.length + 1;
+  return prefix + String(num).padStart(3,'0');
+}
+
+function checkout(){
+  if(state.cart.length===0) return;
+  const id = generateOrderId();
+  const now = new Date();
+  const order = {
+    id,
+    table: state.table,
+    items: state.cart.map(i=>({...i})),
+    total: state.cart.reduce((s,i)=>s+i.price*i.qty,0),
+    time: now.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'}),
+    timestamp: now.getTime(),
+    date: now.toISOString().split('T')[0],
+    status: 'done'
+  };
+  if(db){ db.ref('ns/orders/'+id).set(order).catch(()=>{}); }
+  state.orders.unshift(order);
+  state.lastOrder = order;
+  state.cart = [];
+  updateCartUI();
+  closeCart();
+  showSuccess(order);
+  renderOrders(); renderRevenue();
+}
+
+function showSuccess(order){
+  $('success-id').textContent = `Mã đơn: ${order.id} • ${order.table}`;
+  $('success-total').textContent = formatPrice(order.total);
+  $('success').classList.remove('hidden'); $('success').classList.add('flex');
+}
+
+function hideSuccess(){ $('success').classList.add('hidden'); $('success').classList.remove('flex'); }
+
+function printBill(order){
+  const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${order.id}</title>
+  <style>@page{size:80mm auto;margin:2mm}*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Be Vietnam Pro',Arial,sans-serif;width:76mm;font-size:13px;color:#000;padding:2mm;line-height:1.35}.c{text-align:center}.b{font-weight:700}.lg{font-size:18px}.line{border-top:1px dashed #000;margin:5px 0}.r{display:flex;justify-content:space-between}.mt4{margin-top:4px}</style></head><body>
+  <div class="c b lg">TRÀ SỮA NHƯ SAY</div>
+  <div class="c" style="font-size:11px">Ngon như say, say như nghiện</div>
+  <div class="c" style="font-size:11px">ĐT: 0909.xxx.xxx</div>
+  <div class="line"></div>
+  <div class="r"><span>HĐ: <span class="b">${order.id}</span></span><span>${order.time}</span></div>
+  <div>Bàn: <span class="b">${order.table}</span></div>
+  <div class="line"></div>
+  ${order.items.map(i=>`<div class="r"><span>${i.name} x${i.qty}</span><span>${formatPrice(i.price*i.qty)}</span></div>`).join('')}
+  <div class="line"></div>
+  <div class="r b" style="font-size:16px"><span>TỔNG CỘNG</span><span>${formatPrice(order.total)}</span></div>
+  <div class="line"></div>
+  <div class="c mt4">Cảm ơn quý khách!</div>
+  <div class="c">Hẹn gặp lại ♥</div>
+  <script>window.onload=()=>{setTimeout(()=>{window.print();window.close()},200)}<\/script>
+  </body></html>`;
+  const w = window.open('', '_blank');
+  if(w){ w.document.write(html); w.document.close(); }
+}
+
+function renderOrders(){
+  const list = $('orders-list'); list.innerHTML='';
+  const today = new Date().toISOString().split('T')[0];
+  const todayOrders = state.orders.filter(o=>o.date===today);
+  $('orders-count').textContent = todayOrders.length + ' đơn';
+  if(todayOrders.length===0){ list.innerHTML = `<div class="text-center py-12 text-gray-400">Chưa có đơn nào</div>`; return; }
+  todayOrders.forEach(o=>{
+    const div = document.createElement('div');
+    div.className = 'bg-white rounded-2xl p-3.5 shadow-sm border border-gray-100 active:scale-[0.99]';
+    div.innerHTML = `<div class="flex justify-between items-start"><div><div class="font-bold text-[15px]">${o.id}</div><div class="text-[12px] text-gray-500 mt-0.5">${o.table} • ${o.time}</div></div><div class="text-right"><div class="font-bold text-pink-600">${formatPrice(o.total)}</div><button class="text-[11px] text-gray-500 mt-1 underline print-btn">In lại</button></div></div><div class="text-[12px] text-gray-600 mt-2 line-clamp-1">${o.items.map(i=>i.name+' x'+i.qty).join(' • ')}</div>`;
+    div.querySelector('.print-btn').onclick = (e)=>{ e.stopPropagation(); printBill(o); };
+    list.appendChild(div);
+  });
+}
+
+function renderRevenue(){
+  const today = new Date().toISOString().split('T')[0];
+  const todayOrders = state.orders.filter(o=>o.date===today);
+  const total = todayOrders.reduce((s,o)=>s+o.total,0);
+  $('rev-total').textContent = formatPrice(total);
+  $('rev-count').textContent = todayOrders.length;
+  const top = {};
+  todayOrders.forEach(o=>o.items.forEach(i=>{ top[i.name]=(top[i.name]||0)+i.qty; }));
+  const sorted = Object.entries(top).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  $('rev-top').innerHTML = sorted.length? sorted.map(([n,q])=>`<div class="flex justify-between"><span>${n}</span><span class="font-semibold">${q}</span></div>`).join('') : '<div class="text-gray-400">Chưa có dữ liệu</div>';
+}
+
+function renderMenuList(){
+  const list = $('menu-list'); list.innerHTML='';
+  state.products.forEach(p=>{
+    const div = document.createElement('div');
+    div.className = 'bg-white rounded-2xl p-3 shadow-sm border flex items-center gap-3';
+    div.innerHTML = `<div class="flex-1"><div class="font-medium text-[14px]">${p.name}</div><div class="text-[12px] text-gray-500">${p.category}</div></div><input type="number" value="${p.price}" class="w-24 h-10 px-2 rounded-xl bg-gray-100 text-right text-[15px] outline-none focus:ring-2 focus:ring-pink-500" data-id="${p.id}"><label class="flex items-center gap-1 text-[12px]"><input type="checkbox" ${p.active?'checked':''} data-active="${p.id}"> Hiện</label>`;
+    const inp = div.querySelector('input[type=number]');
+    inp.onchange = ()=>{ p.price = parseInt(inp.value)||0; if(db) db.ref('ns/menu/'+p.id+'/price').set(p.price); renderProducts(); };
+    div.querySelector('input[type=checkbox]').onchange = (e)=>{ p.active=e.target.checked; if(db) db.ref('ns/menu/'+p.id+'/active').set(p.active); updateCategories(); renderProducts(); };
+    list.appendChild(div);
+  });
+}
+
+function switchTab(tab){
+  state.currentTab = tab;
+  document.querySelectorAll('[id^=tab-]').forEach(s=>s.classList.add('hidden'));
+  $('tab-'+tab).classList.remove('hidden');
+  document.querySelectorAll('.tab-btn').forEach(b=>{
+    const active = b.dataset.tab===tab;
+    b.classList.toggle('text-pink-600', active);
+    b.classList.toggle('text-gray-400', !active);
+  });
+}
+
+function bindEvents(){
+  $('login-form').onsubmit = (e)=>{ e.preventDefault(); const pw=$('password').value; if(pw==='260426'){ $('login').classList.add('hidden'); $('app').classList.remove('hidden'); init(); } else { $('login-error').textContent='Mật khẩu không đúng'; $('password').value=''; $('password').focus(); } };
+  $('search').oninput = (e)=>{ state.search=e.target.value; renderProducts(); };
+  $('cart-bar-inner').onclick = openCart;
+  $('btn-checkout').onclick = (e)=>{ e.stopPropagation(); openCart(); };
+  $('cart-close').onclick = closeCart;
+  $('cart-backdrop').onclick = closeCart;
+  $('cart-checkout').onclick = checkout;
+  $('success-done').onclick = hideSuccess;
+  $('success-print').onclick = ()=>{ if(state.lastOrder) printBill(state.lastOrder); hideSuccess(); };
+  document.querySelectorAll('.tab-btn').forEach(b=> b.onclick = ()=> switchTab(b.dataset.tab));
+  $('btn-add-product').onclick = ()=>{
+    const name = prompt('Tên món:'); if(!name) return;
+    const price = parseInt(prompt('Giá (vnđ):')||'0'); if(!price) return;
+    const cat = prompt('Danh mục (Trà Sữa/Trà Trái Cây/Topping):','Trà Sữa')||'Khác';
+    const id = 'p'+Date.now();
+    const p = {id,name,price,category:cat,active:true};
+    state.products.push(p);
+    if(db) db.ref('ns/menu/'+id).set(p);
+    updateCategories(); renderProducts(); renderMenuList();
+  };
+}
+
+// Prevent double-tap zoom
+let lastTouch = 0;
+document.addEventListener('touchend', e=>{ const now=Date.now(); if(now-lastTouch<=300) e.preventDefault(); lastTouch=now; }, {passive:false});
+</script>
+</body>
+</html>
