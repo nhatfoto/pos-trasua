@@ -145,7 +145,17 @@ function loadData(){ if(db){ $('sync-dot') && ($('sync-dot').className='w-1.5 h-
           const match = o.id && o.id.match(/NS(\d{2})(\d{2})(\d{2})/);
           if(match){
             const yy = 2000+parseInt(match[1]); const mm=parseInt(match[2])-1; const dd=parseInt(match[3]);
-            o.timestamp = new Date(yy, mm, dd, 12, 0, 0).getTime();
+            if(!o.timestamp || isNaN(o.timestamp)){
+  const match = o.id && o.id.match(/NS(\d{2})(\d{2})(\d{2})/);
+  if(match && o.time && o.time.includes(':')){
+    // Nếu đã có time dạng "16:59", dùng nó
+    const yy = 2000+parseInt(match[1]); const mm=parseInt(match[2])-1; const dd=parseInt(match[3]);
+    const [hh,mi] = o.time.split(':').map(Number);
+    o.timestamp = new Date(yy, mm, dd, hh||0, mi||0).getTime();
+  } else {
+    o.timestamp = Date.now(); // giờ thật, không phải 12h
+  }
+};
           } else {
             o.timestamp = Date.now();
           }
