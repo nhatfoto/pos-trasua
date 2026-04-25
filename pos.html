@@ -201,14 +201,19 @@
 
 <!-- Success Modal -->
 <div id="successModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-[100] p-4">
-  <div class="bg-white rounded-[32px] p-10 max-w-sm w-full text-center shadow-2xl">
-    <div class="w-24 h-24 mx-auto bg-gradient-to-br from-[#d81b60] to-[#ff6b9d] rounded-full flex items-center justify-center mb-5 shadow-xl shadow-pink-200 animate-pulse">
-      <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+  <div class="bg-white rounded-[32px] p-8 max-w-sm w-full text-center shadow-2xl">
+    <div class="w-20 h-20 mx-auto bg-gradient-to-br from-[#d81b60] to-[#ff6b9d] rounded-full flex items-center justify-center mb-4 shadow-xl shadow-pink-200">
+      <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
     </div>
-    <h3 class="text-[26px] font-bold mb-2">Thành công!</h3>
-    <p class="text-gray-500 mb-1">Đơn <span id="successOrderId" class="font-mono font-semibold text-gray-700"></span> đã lưu</p>
-    <p class="text-4xl font-extrabold bg-gradient-to-r from-[#d81b60] to-[#ff6b9d] bg-clip-text text-transparent my-4" id="successTotal">0₫</p>
-    <button onclick="closeSuccess()" class="w-full py-3.5 bg-[#ffe4ee] text-[#d81b60] rounded-2xl font-bold hover:bg-[#ffd6e7] transition">Xong</button>
+    <h3 class="text-[24px] font-bold mb-1">Thanh toán thành công!</h3>
+    <p class="text-gray-500 text-sm mb-3">Đơn <span id="successOrderId" class="font-mono font-semibold text-gray-700"></span> • <span id="successTable"></span></p>
+    <p class="text-3xl font-extrabold bg-gradient-to-r from-[#d81b60] to-[#ff6b9d] bg-clip-text text-transparent mb-4" id="successTotal">0₫</p>
+    <div id="successItems" class="text-left bg-[#fff8fb] rounded-2xl p-3 mb-4 max-h-32 overflow-auto text-sm"></div>
+    <div class="grid grid-cols-2 gap-3">
+      <button onclick="closeSuccess()" class="py-3 bg-gray-100 text-gray-700 rounded-2xl font-bold hover:bg-gray-200 transition">Xong</button>
+      <button id="printBtn" class="py-3 bg-gradient-to-r from-[#d81b60] to-[#ff6b9d] text-white rounded-2xl font-bold shadow-md hover:shadow-lg transition">In bill</button>
+    </div>
+    <p class="text-[11px] text-gray-400 mt-3">In bill để sau cũng được — đơn đã lưu</p>
   </div>
 </div>
 
@@ -277,7 +282,7 @@ const defaultMenu = [
  {name:'Bánh plan',price:6000,icon:'🍮',img:'',category:'Topping'},
 ];
 
-let state = { menu:[], orders:{}, settings:{tables:10,employees:['Chủ quán']}, carts:{}, selectedTable:'Mang về', selectedCategory:'Tất cả', search:'' };
+let state = { menu:[], orders:{}, settings:{tables:10,employees:['Chủ quán']}, carts:{}, selectedTable:'Mang về', selectedCategory:'Trà Sữa', search:'' };
 let currentUser = JSON.parse(localStorage.getItem('ns_user')||'null')||{name:'Chủ quán'};
 localStorage.setItem('ns_user', JSON.stringify(currentUser));
 let revenueChart;
@@ -365,7 +370,7 @@ function renderCategories(){
 function renderProducts(){
   const grid = document.getElementById('productGrid');
   const q = state.search.toLowerCase();
-  const list = state.menu.filter(m=> (state.selectedCategory==='Tất cả'||m.category===state.selectedCategory) && m.name.toLowerCase().includes(q));
+  const list = state.menu.filter(m=> m.category===state.selectedCategory && m.name.toLowerCase().includes(q));
   grid.innerHTML = list.map(p=>`
     <button class="group bg-white border border-pink-100/60 rounded-[24px] p-4 text-left hover:shadow-[0_12px_30px_rgba(216,27,96,0.15)] hover:-translate-y-1 hover:border-pink-200 transition-all active:scale-95" data-p='${encodeURIComponent(JSON.stringify(p))}'>
       <div class="text-[32px] leading-none mb-3 group-hover:scale-110 transition">${p.icon||'🧋'}</div>
