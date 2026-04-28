@@ -353,33 +353,25 @@ document.addEventListener('DOMContentLoaded', ()=>{
   firebase.auth().signInAnonymously().catch(()=>{});
   
   function doLogin(){
-    const pin = pinInput.value.trim();
-    if(pin.length!==6){ pinError.textContent='Nhập đủ 6 số'; return; }
-    pinError.textContent='Đang kiểm tra...';
-    pinBtn.disabled = true;
-    root.child('settings/pin').once('value').then(snap=>{
-      let serverPin = snap.val();
-      if(!serverPin){ // lần đầu chưa có, tạo mặc định
-        serverPin = '260426';
-        root.child('settings/pin').set(serverPin);
-      }
-      if(pin === String(serverPin)){
-        localStorage.setItem('ns_pin_ok','1');
-        localStorage.setItem('ns_pin_time', Date.now().toString());
-        currentUser = {name:'Chủ quán'};
-        lock.classList.add('hidden');
-        app.classList.remove('hidden');
-        document.getElementById('headerUser').textContent = currentUser.name;
-        initTabs(); bindUI(); loadData();
-      } else {
-        pinError.textContent='Sai mã PIN!';
-        pinBtn.disabled = false;
-        pinInput.value=''; pinInput.focus();
-      }
-    });
+  const pin = pinInput.value.trim();
+  if(pin.length!==6){ pinError.textContent='Nhập đủ 6 số'; return; }
+  pinBtn.disabled = true;
+  // Lần đầu chưa có hash thì tạo mặc định 260426
+  const savedHash = localStorage.getItem('ns_pin_hash') || 'e3b0c...'; // sẽ set bên dưới
+  const hash = btoa(pin); // đơn giản, đủ cho quán. Muốn mạnh hơn dùng SHA-256
+  if(!localStorage.getItem('ns_pin_hash')){
+    localStorage.setItem('ns_pin_hash', btoa('260426'));
   }
-  if(pinBtn) pinBtn.onclick = doLogin;
-  if(pinInput) pinInput.onkeypress = e=>{ if(e.key==='Enter') doLogin(); };
+  if(hash === localStorage.getItem('ns_pin_hash')){
+    localStorage.setItem('ns_pin_ok','1');
+    localStorage.setItem('ns_pin_time', Date.now().toString());
+    lock.classList.add('hidden'); app.classList.remove('hidden');
+    initTabs(); bindUI(); loadData();
+  } else {
+    pinError.textContent='Sai mã PIN!';
+    pinBtn.disabled = false; pinInput.value=''; pinInput.focus();
+  }
+}
   
   // Tự động vào nếu đã đăng nhập trong 12h
   const ok = localStorage.getItem('ns_pin_ok');
