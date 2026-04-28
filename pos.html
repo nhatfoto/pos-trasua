@@ -10,6 +10,7 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
   *{font-family:'Be Vietnam Pro',sans-serif}
@@ -23,10 +24,10 @@
   <div class="bg-white rounded-[32px] p-8 w-full max-w-sm shadow-2xl text-center">
     <img src="logo.png" class="w-20 h-20 mx-auto rounded-full border-4 border-pink-100 mb-4 object-cover" onerror="this.style.display='none'">
     <h1 class="text-2xl font-bold text-[#d81b60] mb-1">Trà Sữa Như Say</h1>
-    <p class="text-gray-500 text-sm mb-6">Nhập mật khẩu để vào POS</p>
-    <input id="pwInput" type="password" placeholder="••••••" class="w-full px-4 py-3.5 text-center text-xl tracking-widest border-2 border-pink-200 rounded-2xl outline-none focus:border-[#d81b60] font-mono">
-    <button id="pwBtn" class="w-full mt-4 py-3.5 bg-gradient-to-r from-[#d81b60] to-[#ff6b9d] text-white rounded-2xl font-bold text-[17px] shadow-lg">Mở khóa</button>
-    <p id="pwError" class="text-red-500 text-sm mt-3 h-5"></p>
+    <p class="text-gray-500 text-sm mb-6">Nhập mã PIN 6 số</p>
+    <input id="pinInput" type="password" inputmode="numeric" maxlength="6" placeholder="••••••" class="w-full px-4 py-3.5 text-center text-2xl tracking-[0.5em] border-2 border-pink-200 rounded-2xl outline-none focus:border-[#d81b60] font-mono">
+    <button id="pinBtn" class="w-full mt-4 py-3.5 bg-gradient-to-r from-[#d81b60] to-[#ff6b9d] text-white rounded-2xl font-bold text-[17px] shadow-lg">Mở khóa</button>
+    <p id="pinError" class="text-red-500 text-sm mt-3 h-5"></p>
     <p class="text-[11px] text-gray-400 mt-6">Hotline: 0347.047.141</p>
   </div>
 </div>
@@ -206,6 +207,7 @@
             <p class="text-xs text-gray-500 mt-2">Được lưu trên thiết bị này</p>
           </div>
           <button id="saveSettingsBtn" class="w-full md:w-auto px-8 py-3.5 bg-gradient-to-r from-[#d81b60] to-[#ff6b9d] text-white rounded-2xl font-semibold shadow-lg shadow-pink-200">Lưu cài đặt lên Firebase</button>
+          <button id="logoutBtn" class="w-full md:w-auto mt-3 px-8 py-3.5 bg-gray-900 text-white rounded-2xl font-semibold">Đăng xuất</button>
         </div>
       </div>
     </section>
@@ -223,10 +225,11 @@
     <p class="text-3xl font-extrabold bg-gradient-to-r from-[#d81b60] to-[#ff6b9d] bg-clip-text text-transparent mb-4" id="successTotal">0₫</p>
     <div id="successItems" class="text-left bg-[#fff8fb] rounded-2xl p-3 mb-4 max-h-32 overflow-auto text-sm"></div>
     <div class="grid grid-cols-2 gap-3">
-      <button onclick="closeSuccess()" class="py-3 bg-gray-100 text-gray-700 rounded-2xl font-bold hover:bg-gray-200 transition">Xong</button>
-      <button id="printBtn" class="py-3 bg-gradient-to-r from-[#d81b60] to-[#ff6b9d] text-white rounded-2xl font-bold shadow-md hover:shadow-lg transition">In bill</button>
+      <button id="printBillBtn" class="py-3 bg-gray-900 text-white rounded-2xl font-bold hover:bg-black transition">In bill khách</button>
+      <button id="printKitchenBtn" class="py-3 bg-gradient-to-r from-[#d81b60] to-[#ff6b9d] text-white rounded-2xl font-bold shadow-md hover:shadow-lg transition">In phiếu bếp</button>
     </div>
-    <p class="text-[11px] text-gray-400 mt-3">In bill để sau cũng được — đơn đã lưu</p>
+    <button onclick="closeSuccess()" class="w-full mt-3 py-2.5 text-gray-500 text-sm font-medium hover:text-gray-700">Đóng</button>
+    <p class="text-[11px] text-gray-400 mt-2">Phiếu bếp đã tự in khi thanh toán</p>
   </div>
 </div>
 
@@ -246,7 +249,7 @@ const DB_PATH = 'nhusay-pos';
 const root = db.ref(DB_PATH);
 
 const cleanMenuItem = i => ({ name:String(i.name||'').trim(), price:parseInt(i.price)||0, icon:String(i.icon||'🧋'), img:String(i.img||''), category:String(i.category||'Trà Sữa').trim() });
-const cleanCartItem = i => ({ name:String(i.name), price:Number(i.price)||0, qty:Number(i.qty)||1, icon:String(i.icon||''), img:String(i.img||'') });
+const cleanCartItem = i => ({ name:String(i.name), price:Number(i.price)||0, qty:Number(i.qty)||1, icon:String(i.icon||''), img:String(i.img||''), note:String(i.note||'').trim() });
 
 const defaultMenu = [
  // TRÀ SỮA - 25K đồng giá
@@ -308,27 +311,50 @@ const saveCarts = () => localStorage.setItem('ns_carts', JSON.stringify(state.ca
 function getLocalDate(){ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
 
 document.addEventListener('DOMContentLoaded', ()=>{
-  const PASS = '260426';
   const lock = document.getElementById('loginLock');
   const app = document.getElementById('appWrap');
+  const emailInput = document.getElementById('emailInput');
   const pwInput = document.getElementById('pwInput');
   const pwBtn = document.getElementById('pwBtn');
   const pwError = document.getElementById('pwError');
   
-  function unlock(){
-    if(pwInput.value === PASS){
+  function doLogin(){
+    const email = emailInput.value.trim();
+    const pass = pwInput.value;
+    pwError.textContent = 'Đang đăng nhập...';
+    pwBtn.disabled = true;
+    firebase.auth().signInWithEmailAndPassword(email, pass)
+      .then(cred=>{
+        currentUser = {name: cred.user.email.split('@')[0], email: cred.user.email, uid: cred.user.uid};
+        localStorage.setItem('ns_user', JSON.stringify(currentUser));
+        lock.classList.add('hidden');
+        app.classList.remove('hidden');
+        document.getElementById('headerUser').textContent = currentUser.name;
+        initTabs(); bindUI(); loadData();
+      })
+      .catch(err=>{
+        pwError.textContent = 'Sai email hoặc mật khẩu!';
+        pwBtn.disabled = false;
+        pwInput.value=''; pwInput.focus();
+      });
+  }
+  pwBtn.onclick = doLogin;
+  pwInput.onkeypress = e=>{ if(e.key==='Enter') doLogin(); };
+  emailInput.onkeypress = e=>{ if(e.key==='Enter') doLogin(); };
+  
+  // Tự động đăng nhập nếu đã login
+  firebase.auth().onAuthStateChanged(user=>{
+    if(user){
+      currentUser = {name: user.email.split('@')[0], email: user.email, uid: user.uid};
+      localStorage.setItem('ns_user', JSON.stringify(currentUser));
       lock.classList.add('hidden');
       app.classList.remove('hidden');
       document.getElementById('headerUser').textContent = currentUser.name;
       initTabs(); bindUI(); loadData();
     } else {
-      pwError.textContent = 'Sai mật khẩu!';
-      pwInput.value=''; pwInput.focus();
+      emailInput.focus();
     }
-  }
-  pwBtn.onclick = unlock;
-  pwInput.onkeypress = e=>{ if(e.key==='Enter') unlock(); };
-  pwInput.focus();
+  });
 });
 
 function initTabs(){
@@ -398,6 +424,7 @@ function bindUI(){
   document.getElementById('saveMenuBtn').onclick = () => saveMenu(false);
   document.getElementById('addEmployeeBtn').onclick = addEmployee;
   document.getElementById('saveSettingsBtn').onclick = saveSettings;
+  document.getElementById('logoutBtn').onclick = ()=>{ firebase.auth().signOut().then(()=>location.reload()); };
   document.getElementById('settingTables').addEventListener('change', e=>{ state.settings.tables = Math.max(1, Math.min(30, parseInt(e.target.value)||10)); renderTables(); });
 }
 
@@ -459,19 +486,21 @@ function renderCart(){
   } else {
     empty.classList.add('hidden');
     wrap.innerHTML = cart.map((it,i)=>`
-      <div class="flex items-center gap-3">
-        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#fff0f5] to-[#ffe4ee] flex items-center justify-center text-[22px]">${it.icon||'🧋'}</div>
+      <div class="flex items-start gap-3">
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#fff0f5] to-[#ffe4ee] flex items-center justify-center text-[22px] mt-1">${it.icon||'🧋'}</div>
         <div class="flex-1 min-w-0">
           <div class="font-semibold truncate text-[14px]">${it.name}</div>
           <div class="text-[13px] text-[#d81b60] font-bold">${fmt(it.price)}</div>
+          <input data-note="${i}" placeholder="Ghi chú: ít đá, 50% đường..." value="${it.note||''}" class="w-full mt-1.5 px-2 py-1.5 text-xs bg-[#fff8fb] border border-pink-100 rounded-lg outline-none focus:ring-1 focus:ring-pink-300">
         </div>
-        <div class="flex items-center gap-2 bg-[#fff0f5] rounded-full p-1">
+        <div class="flex items-center gap-2 bg-[#fff0f5] rounded-full p-1 mt-1">
           <button class="w-7 h-7 rounded-full hover:bg-white text-[#d81b60] font-bold" data-i="${i}" data-d="-1">−</button>
           <span class="w-6 text-center font-bold text-[14px]">${it.qty}</span>
           <button class="w-7 h-7 rounded-full bg-[#d81b60] hover:bg-[#c2185b] text-white font-bold" data-i="${i}" data-d="1">+</button>
         </div>
       </div>`).join('');
     wrap.querySelectorAll('button').forEach(b=>b.onclick=()=>changeQty(+b.dataset.i, +b.dataset.d));
+    wrap.querySelectorAll('input[data-note]').forEach(inp=>inp.onchange=e=>{ const i=+e.target.dataset.note; const cart=state.carts[state.selectedTable]||[]; cart[i].note=e.target.value; state.carts[state.selectedTable]=cart; saveCarts(); });
   }
   const total = cart.reduce((s,i)=>s+i.price*i.qty,0);
   document.getElementById('subtotal').textContent = fmt(total);
@@ -493,11 +522,12 @@ function checkout(){
   const todayCount = Object.values(state.orders || {}).filter(o => o.id && o.id.startsWith(prefix)).length;
   const seq = String(todayCount + 1).padStart(3, '0');
   const id = prefix + seq;
-  const order = { id, table:state.selectedTable, items:cart.map(cleanCartItem), total, time:now.toISOString(), date:getLocalDate(), timestamp:now.getTime(), user:currentUser.name, status:'done' };
+  const order = { id, table:state.selectedTable, items:cart.map(cleanCartItem), total, time:now.toISOString(), date:getLocalDate(), timestamp:now.getTime(), user:currentUser.name, status:'pending' };
   const clean = JSON.parse(JSON.stringify(order));
   root.child('orders').child(id).set(clean).then(()=>{
     delete state.carts[state.selectedTable]; saveCarts(); renderCart();
     showSuccess(order);
+    setTimeout(()=>printKitchenTicket(order), 300);
   });
 }
 
@@ -505,8 +535,9 @@ function showSuccess(o){
   document.getElementById('successOrderId').textContent = o.id;
   document.getElementById('successTable').textContent = o.table;
   document.getElementById('successTotal').textContent = fmt(o.total);
-  document.getElementById('successItems').innerHTML = o.items.map(i=>`<div class="flex justify-between py-1"><span>${i.name} x${i.qty}</span><span class="font-semibold">${fmt(i.price*i.qty)}</span></div>`).join('');
-  document.getElementById('printBtn').onclick = ()=>{ printBill(o); closeSuccess(); };
+  document.getElementById('successItems').innerHTML = o.items.map(i=>`<div class="flex justify-between py-1"><span>${i.name} x${i.qty}${i.note?` <em style="color:#d81b60">(${i.note})</em>`:''}</span><span class="font-semibold">${fmt(i.price*i.qty)}</span></div>`).join('');
+  document.getElementById('printBillBtn').onclick = ()=>{ printBill(o); };
+  document.getElementById('printKitchenBtn').onclick = ()=>{ printKitchenTicket(o); };
   const m = document.getElementById('successModal'); m.classList.remove('hidden'); m.classList.add('flex');
 }
 function closeSuccess(){ const m=document.getElementById('successModal'); m.classList.add('hidden'); m.classList.remove('flex'); }
@@ -526,6 +557,26 @@ function printBill(o){
   <div class="row total"><span>TỔNG CỘNG</span><span style="color:#d81b60">${fmt(o.total)}</span></div>
   <div class="foot">Cảm ơn quý khách! 💖<br>Hẹn gặp lại</div>
   <script>window.onload=()=>{window.print();setTimeout(()=>window.close(),300)}<\/script></body></html>`);
+  w.document.close();
+}
+
+function printKitchenTicket(o){
+  const w = window.open('','_blank','width=340,height=700');
+  const items = o.items.map(i=>`<div style="margin-bottom:12px; padding-bottom:12px; border-bottom:2px dashed #000;">
+    <div style="font-size:22px; font-weight:900; line-height:1.2">${i.name} <span style="float:right">x${i.qty}</span></div>
+    ${i.note?`<div style="font-size:16px; color:#d81b60; font-weight:700; margin-top:4px; text-transform:uppercase">→ ${i.note}</div>`:''}
+  </div>`).join('');
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>BẾP-${o.id}</title>
+  <style>@page{size:80mm auto;margin:0}body{font-family:'Be Vietnam Pro',Arial;width:80mm;margin:0;padding:10px} .header{text-align:center; border:3px solid #000; padding:8px; margin-bottom:10px} .table{font-size:28px; font-weight:900} .id{font-size:14px; margin-top:4px} .time{font-size:12px; margin-top:2px}</style></head>
+  <body>
+    <div class="header">
+      <div class="table">${o.table.toUpperCase()}</div>
+      <div class="id">${o.id}</div>
+      <div class="time">${new Date(o.time).toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'})} - ${o.user}</div>
+    </div>
+    ${items}
+    <script>window.onload=()=>{window.print();setTimeout(()=>window.close(),500)}<\/script>
+  </body></html>`);
   w.document.close();
 }
 
