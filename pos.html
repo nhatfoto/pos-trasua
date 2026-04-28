@@ -623,11 +623,34 @@ function printKitchenTicket(o){
   w.document.close();
 }
 
+function showOrderDetail(id){
+  const o = state.orders[id]; if(!o) return;
+  document.getElementById('detailOrderId').textContent = o.id;
+  document.getElementById('detailTable').textContent = o.table;
+  document.getElementById('detailTime').textContent = new Date(o.time).toLocaleString('vi-VN');
+  document.getElementById('detailUser').textContent = o.user||'';
+  document.getElementById('detailTotal').textContent = fmt(o.total);
+  document.getElementById('detailItems').innerHTML = o.items.map(i=>`
+    <div class="flex justify-between items-start py-2 border-b border-pink-50 last:border-0">
+      <div class="flex-1">
+        <div class="font-medium">${i.name} <span class="text-gray-500">x${i.qty}</span></div>
+        ${i.note?`<div class="text-xs text-[#d81b60] mt-0.5">Ghi chú: ${i.note}</div>`:''}
+      </div>
+      <div class="font-semibold ml-3">${fmt(i.price*i.qty)}</div>
+    </div>`).join('');
+  document.getElementById('detailPrintBill').onclick = ()=>printBill(o);
+  document.getElementById('detailPrintKitchen').onclick = ()=>printKitchenTicket(o);
+  const m = document.getElementById('orderDetailModal'); m.classList.remove('hidden'); m.classList.add('flex');
+}
+function closeOrderDetail(){ const m=document.getElementById('orderDetailModal'); m.classList.add('hidden'); m.classList.remove('flex'); }
+window.closeOrderDetail = closeOrderDetail;
+window.showOrderDetail = showOrderDetail;
+
 function renderOrders(){
   const wrap = document.getElementById('orderList');
   const orders = Object.values(state.orders).sort((a,b)=>new Date(b.time)-new Date(a.time)).slice(0,100);
   wrap.innerHTML = orders.map(o=>`
-    <div class="group flex items-center justify-between p-4 bg-gradient-to-r from-[#fff9fb] to-white rounded-2xl border border-pink-50 hover:border-pink-200 hover:shadow-md transition">
+    <div onclick="showOrderDetail('${o.id}')" class="group cursor-pointer flex items-center justify-between p-4 bg-gradient-to-r from-[#fff9fb] to-white rounded-2xl border border-pink-50 hover:border-pink-200 hover:shadow-md transition">
       <div class="min-w-0 flex-1">
         <div class="flex items-center gap-2"><span class="font-bold text-[#d81b60]">${o.id}</span><span class="px-2.5 py-0.5 bg-[#ffe4ee] text-[#d81b60] rounded-full text-xs font-semibold">${o.table}</span></div>
         <div class="text-xs text-gray-500 mt-1">${new Date(o.time).toLocaleString('vi-VN')} • ${o.user||''}</div>
@@ -635,7 +658,7 @@ function renderOrders(){
       </div>
       <div class="text-right ml-4">
         <div class="font-extrabold text-lg text-gray-900">${fmt(o.total)}</div>
-        <button data-print="${o.id}" class="mt-1 text-xs px-3 py-1.5 bg-gray-900 text-white rounded-lg opacity-0 group-hover:opacity-100 transition">In lại</button>
+        <button data-print="${o.id}" onclick="event.stopPropagation()" class="mt-1 text-xs px-3 py-1.5 bg-gray-900 text-white rounded-lg opacity-0 group-hover:opacity-100 transition">In lại</button>
       </div>
     </div>`).join('') || '<div class="text-center py-16 text-gray-400">Chưa có đơn hàng nào</div>';
   wrap.querySelectorAll('[data-print]').forEach(b=>b.onclick=()=>{ const o=state.orders[b.dataset.print]; if(o) printBill(o); });
