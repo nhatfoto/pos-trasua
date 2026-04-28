@@ -206,6 +206,14 @@
             <select id="currentUserSelect" class="w-full max-w-xs py-3 px-4 bg-[#fff0f5] rounded-xl outline-none focus:ring-2 focus:ring-pink-200 font-medium"></select>
             <p class="text-xs text-gray-500 mt-2">Được lưu trên thiết bị này</p>
           </div>
+          <div class="border-t border-pink-50 pt-8">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Đổi mã PIN (6 số)</label>
+            <div class="flex gap-2 max-w-xs">
+              <input id="newPinInput" type="password" inputmode="numeric" maxlength="6" placeholder="PIN mới" class="flex-1 py-3 px-4 bg-[#fff0f5] rounded-xl outline-none focus:ring-2 focus:ring-pink-200 font-mono text-center tracking-widest">
+              <button id="changePinBtn" class="px-5 py-3 bg-[#d81b60] text-white rounded-xl font-medium hover:bg-[#c2185b]">Đổi</button>
+            </div>
+            <p class="text-xs text-gray-500 mt-2">PIN lưu trên Firebase, không còn hard-code</p>
+          </div>
           <button id="saveSettingsBtn" class="w-full md:w-auto px-8 py-3.5 bg-gradient-to-r from-[#d81b60] to-[#ff6b9d] text-white rounded-2xl font-semibold shadow-lg shadow-pink-200">Lưu cài đặt lên Firebase</button>
           <button id="logoutBtn" class="w-full md:w-auto mt-3 px-8 py-3.5 bg-gray-900 text-white rounded-2xl font-semibold">Đăng xuất</button>
         </div>
@@ -230,6 +238,29 @@
     </div>
     <button onclick="closeSuccess()" class="w-full mt-3 py-2.5 text-gray-500 text-sm font-medium hover:text-gray-700">Đóng</button>
     <p class="text-[11px] text-gray-400 mt-2">Phiếu bếp đã tự in khi thanh toán</p>
+  </div>
+</div>
+
+<!-- Order Detail Modal -->
+<div id="orderDetailModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-[100] p-4">
+  <div class="bg-white rounded-[32px] p-6 max-w-md w-full shadow-2xl max-h-[90vh] overflow-auto">
+    <div class="flex items-start justify-between mb-4">
+      <div>
+        <h3 class="text-[22px] font-bold">Chi tiết đơn</h3>
+        <p class="text-sm text-gray-500"><span id="detailOrderId" class="font-mono font-semibold"></span> • <span id="detailTable"></span></p>
+      </div>
+      <button onclick="closeOrderDetail()" class="w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 font-bold">✕</button>
+    </div>
+    <div class="text-xs text-gray-500 mb-3"><span id="detailTime"></span> • <span id="detailUser"></span></div>
+    <div id="detailItems" class="space-y-2 mb-4"></div>
+    <div class="border-t pt-3 flex justify-between items-center">
+      <span class="font-semibold">Tổng cộng</span>
+      <span id="detailTotal" class="text-2xl font-bold text-[#d81b60]">0₫</span>
+    </div>
+    <div class="grid grid-cols-2 gap-3 mt-5">
+      <button id="detailPrintBill" class="py-3 bg-gray-900 text-white rounded-2xl font-bold">In bill</button>
+      <button id="detailPrintKitchen" class="py-3 bg-[#d81b60] text-white rounded-2xl font-bold">In phiếu bếp</button>
+    </div>
   </div>
 </div>
 
@@ -313,48 +344,53 @@ function getLocalDate(){ const d=new Date(); return `${d.getFullYear()}-${String
 document.addEventListener('DOMContentLoaded', ()=>{
   const lock = document.getElementById('loginLock');
   const app = document.getElementById('appWrap');
-  const emailInput = document.getElementById('emailInput');
-  const pwInput = document.getElementById('pwInput');
-  const pwBtn = document.getElementById('pwBtn');
-  const pwError = document.getElementById('pwError');
+  const pinInput = document.getElementById('pinInput');
+  const pinBtn = document.getElementById('pinBtn');
+  const pinError = document.getElementById('pinError');
+  
+  // Đăng nhập ẩn danh để đọc Firebase (bảo mật DB)
+  firebase.auth().signInAnonymously().catch(()=>{});
   
   function doLogin(){
-    const email = emailInput.value.trim();
-    const pass = pwInput.value;
-    pwError.textContent = 'Đang đăng nhập...';
-    pwBtn.disabled = true;
-    firebase.auth().signInWithEmailAndPassword(email, pass)
-      .then(cred=>{
-        currentUser = {name: cred.user.email.split('@')[0], email: cred.user.email, uid: cred.user.uid};
-        localStorage.setItem('ns_user', JSON.stringify(currentUser));
+    const pin = pinInput.value.trim();
+    if(pin.length!==6){ pinError.textContent='Nhập đủ 6 số'; return; }
+    pinError.textContent='Đang kiểm tra...';
+    pinBtn.disabled = true;
+    root.child('settings/pin').once('value').then(snap=>{
+      let serverPin = snap.val();
+      if(!serverPin){ // lần đầu chưa có, tạo mặc định
+        serverPin = '260426';
+        root.child('settings/pin').set(serverPin);
+      }
+      if(pin === String(serverPin)){
+        localStorage.setItem('ns_pin_ok','1');
+        localStorage.setItem('ns_pin_time', Date.now().toString());
+        currentUser = {name:'Chủ quán'};
         lock.classList.add('hidden');
         app.classList.remove('hidden');
         document.getElementById('headerUser').textContent = currentUser.name;
         initTabs(); bindUI(); loadData();
-      })
-      .catch(err=>{
-        pwError.textContent = 'Sai email hoặc mật khẩu!';
-        pwBtn.disabled = false;
-        pwInput.value=''; pwInput.focus();
-      });
+      } else {
+        pinError.textContent='Sai mã PIN!';
+        pinBtn.disabled = false;
+        pinInput.value=''; pinInput.focus();
+      }
+    });
   }
-  pwBtn.onclick = doLogin;
-  pwInput.onkeypress = e=>{ if(e.key==='Enter') doLogin(); };
-  emailInput.onkeypress = e=>{ if(e.key==='Enter') doLogin(); };
+  if(pinBtn) pinBtn.onclick = doLogin;
+  if(pinInput) pinInput.onkeypress = e=>{ if(e.key==='Enter') doLogin(); };
   
-  // Tự động đăng nhập nếu đã login
-  firebase.auth().onAuthStateChanged(user=>{
-    if(user){
-      currentUser = {name: user.email.split('@')[0], email: user.email, uid: user.uid};
-      localStorage.setItem('ns_user', JSON.stringify(currentUser));
-      lock.classList.add('hidden');
-      app.classList.remove('hidden');
-      document.getElementById('headerUser').textContent = currentUser.name;
-      initTabs(); bindUI(); loadData();
-    } else {
-      emailInput.focus();
-    }
-  });
+  // Tự động vào nếu đã đăng nhập trong 12h
+  const ok = localStorage.getItem('ns_pin_ok');
+  const t = parseInt(localStorage.getItem('ns_pin_time')||'0');
+  if(ok && Date.now()-t < 12*3600*1000){
+    lock.classList.add('hidden');
+    app.classList.remove('hidden');
+    document.getElementById('headerUser').textContent = currentUser.name;
+    initTabs(); bindUI(); loadData();
+  } else {
+    pinInput.focus();
+  }
 });
 
 function initTabs(){
@@ -424,7 +460,14 @@ function bindUI(){
   document.getElementById('saveMenuBtn').onclick = () => saveMenu(false);
   document.getElementById('addEmployeeBtn').onclick = addEmployee;
   document.getElementById('saveSettingsBtn').onclick = saveSettings;
-  document.getElementById('logoutBtn').onclick = ()=>{ firebase.auth().signOut().then(()=>location.reload()); };
+  document.getElementById('logoutBtn').onclick = ()=>{ localStorage.removeItem('ns_pin_ok'); location.reload(); };
+  document.getElementById('changePinBtn').onclick = ()=>{
+    const newPin = document.getElementById('newPinInput').value.trim();
+    if(!/^\d{6}$/.test(newPin)){ alert('PIN phải đúng 6 số'); return; }
+    if(confirm('Đổi PIN thành '+newPin+' ?')){
+      root.child('settings/pin').set(newPin).then(()=>{ alert('Đã đổi PIN. Lần đăng nhập sau dùng PIN mới.'); document.getElementById('newPinInput').value=''; });
+    }
+  };
   document.getElementById('settingTables').addEventListener('change', e=>{ state.settings.tables = Math.max(1, Math.min(30, parseInt(e.target.value)||10)); renderTables(); });
 }
 
