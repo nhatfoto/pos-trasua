@@ -372,25 +372,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
     pinBtn.disabled = false; pinInput.value=''; pinInput.focus();
   }
 }
-  
-  // Tự động vào nếu đã đăng nhập trong 12h
-  const ok = localStorage.getItem('ns_pin_ok');
-  const t = parseInt(localStorage.getItem('ns_pin_time')||'0');
-  if(ok && Date.now()-t < 12*3600*1000){
-    lock.classList.add('hidden');
-    app.classList.remove('hidden');
-    document.getElementById('changePinBtn').onclick = ()=>{
-  const newPin = document.getElementById('newPinInput').value.trim();
-  if(!/^\d{6}$/.test(newPin)){ alert('PIN phải đúng 6 số'); return; }
-  if(confirm('Đổi PIN thành '+newPin+' ?')){
-    // ghi lên private để bạn nhớ, không ai đọc được
-    root.child('private/pin').set(newPin);
-    // cập nhật hash local
-    localStorage.setItem('ns_pin_hash', btoa(newPin));
-    alert('Đã đổi PIN. Các máy khác cần nhập PIN mới 1 lần.');
-    document.getElementById('newPinInput').value='';
-  }
-};
 
 function initTabs(){
   document.querySelectorAll('.tab-btn').forEach(b=>{
